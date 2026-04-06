@@ -25,15 +25,16 @@ Keep this managed block so 'trellis update' can refresh the instructions.
 2. 在 Linux / WSL / macOS 應寫成 **`/dev/null`**（勿寫成 `del/null`）。
 3. 該腳本多數日誌印在 **stderr**，僅使用 `>/dev/null` 仍會刷屏，故需 **`2>&1`** 一併重導向。
 4. 若自動 `git commit` 仍卡住（例如 GPG 互動簽署），改加 **`--no-commit`**，再由開發者在本機自行提交 `.trellis/workspace`（與必要時的 `.trellis/tasks`）。
+5. **stdin**：腳本在 `stdin` 非 TTY 時會執行 `sys.stdin.read()`；若僅重導 stdout／stderr 而未關閉 stdin，可能**一直阻塞**。非互動／由 agent 執行時**必須**加上 **`</dev/null`**（置於指令前或參數後皆可）。
 
-範例：
+範例（非互動、無輸出、不阻塞）：
 
 ```bash
 python3 ./.trellis/scripts/add_session.py \
   --title "Session Title" \
   --commit "hash1,hash2" \
   --summary "Brief summary" \
-  >/dev/null 2>&1
+  </dev/null >/dev/null 2>&1
 ```
 
 **約定**：上述慣例與補充說明以本檔 `AGENTS.md` 為準；請**不要**在 `.trellis/` **重複貼上**與 `add_session` 相同的操作說明（任務專用文件除外）。
