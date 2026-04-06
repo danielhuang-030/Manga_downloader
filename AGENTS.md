@@ -36,4 +36,9 @@ python3 ./.trellis/scripts/add_session.py \
   >/dev/null 2>&1
 ```
 
-**約定**：上述慣例與補充說明以本檔 `AGENTS.md` 為準；請**不要**為了記載這些內容去修改 `.trellis/` 目錄下的檔案。
+**約定**：上述慣例與補充說明以本檔 `AGENTS.md` 為準；請**不要**在 `.trellis/` **重複貼上**與 `add_session` 相同的操作說明（任務專用文件除外）。
+
+## Trellis：設計／brainstorm 產出位置
+
+- **設計稿、brainstorm 定案、與任務綁定的規格**，請寫在 **對應任務目錄** `.trellis/tasks/<任務目錄>/`（例如與 `prd.md` 同層的 `design.md`）。
+- **不要**預設寫在 repo 的 `docs/superpowers/specs/`（除非專案另有明確約定）。

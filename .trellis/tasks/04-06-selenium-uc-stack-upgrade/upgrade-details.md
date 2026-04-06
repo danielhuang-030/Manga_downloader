@@ -94,6 +94,9 @@
 |------|------|
 | 2026-04-06 | 初版：brainstorming 定案 |
 | 2026-04-06 | 進度：`task.json` 設為 `in_progress`、`current_phase` 1；已提交 pytest 骨架（0c327f4）；階段 0–4 實作仍待進行 |
+| 2026-04-06 | 階段 0：annotated tag `baseline/pre-phase1-security-pins`（ba82570）；[baseline-phase0.md](./baseline-phase0.md)。階段 1：`requirements.txt` 安全性 pin（Pillow 10.4.0、requests 2.32.3、urllib3 2.2.3、certifi／charset-normalizer／idna 等）；驗證待本機 `pip check` + `pytest` + smoke |
+| 2026-04-06 | 階段 2：`Dockerfile` — `signed-by` keyring 安裝 `google-chrome-stable`；移除 `chromedriver.storage.googleapis.com` zip 與 `unzip`；移除 `ENV DISPLAY=:99`；建置步驟執行 `google-chrome-stable --version`。Driver 交由 uc 於執行期解析。容器 E2E 待驗證 |
+| 2026-04-06 | 階段 3：`FROM python:3.12-bookworm`；`requirements.txt` 新增 **setuptools==75.8.0**（Python 3.12 移除 stdlib `distutils`，`undetected-chromedriver` 3.5.5 仍 `import distutils.version`）。映像內 `pip check` + `pytest` 全綠。容器／多站台 E2E 仍待驗證 |
 
 ---
 

@@ -14,7 +14,7 @@
   "branch": null,
   "base_branch": "feat/upgrade",
   "worktree_path": null,
-  "current_phase": 1,
+  "current_phase": 4,
   "next_action": [
     {
       "phase": 1,
@@ -33,7 +33,7 @@
       "action": "create-pr"
     }
   ],
-  "commit": "0c327f4",
+  "commit": "ba82570",
   "pr_url": null,
   "subtasks": [
     {
@@ -50,19 +50,19 @@
     },
     {
       "name": "Phase 0: baseline tag + Chrome/driver notes",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "name": "Phase 1: security pins + pytest green + smoke download",
-      "status": "pending"
+      "status": "in_progress"
     },
     {
       "name": "Phase 2: Dockerfile (apt + remove legacy chromedriver zip)",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "name": "Phase 3: Python 3.12 base image + deps",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "name": "Phase 4: Selenium/uc bump + multi-site E2E",
@@ -75,6 +75,7 @@
     ".trellis/tasks/04-06-selenium-uc-stack-upgrade/assessment.md",
     ".trellis/tasks/04-06-selenium-uc-stack-upgrade/design.md",
     ".trellis/tasks/04-06-selenium-uc-stack-upgrade/upgrade-details.md",
+    ".trellis/tasks/04-06-selenium-uc-stack-upgrade/baseline-phase0.md",
     ".trellis/tasks/04-06-selenium-uc-stack-upgrade/prd.md",
     "requirements.txt",
     "Dockerfile",
@@ -83,7 +84,7 @@
     "requirements-dev.txt",
     "pytest.ini"
   ],
-  "notes": "2026-04-06: in_progress; pytest scaffold 0c327f4; task/progress docs in later commits on feat/upgrade — see git log. Next: pytest locally, phase 0 tag, phase 1 pins per upgrade-details.md.",
+  "notes": "2026-04-06: Phase 3 — python:3.12-bookworm + setuptools for uc on 3.12. Next: Phase 4 Selenium/uc bumps + ≥2 site E2E; optional Phase 1/2 container smoke.",
   "meta": {
     "last_updated": "2026-04-06",
     "branch": "feat/upgrade"
