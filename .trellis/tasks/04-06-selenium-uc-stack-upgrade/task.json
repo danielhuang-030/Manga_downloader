@@ -66,7 +66,7 @@
     },
     {
       "name": "Phase 4: Selenium/uc bump + multi-site E2E",
-      "status": "pending"
+      "status": "in_progress"
     }
   ],
   "children": [],
@@ -84,7 +84,7 @@
     "requirements-dev.txt",
     "pytest.ini"
   ],
-  "notes": "2026-04-06: Phase 3 — python:3.12-bookworm + setuptools for uc on 3.12. Next: Phase 4 Selenium/uc bumps + ≥2 site E2E; optional Phase 1/2 container smoke.",
+  "notes": "2026-04-06: Phase 4 — Selenium 4.41.0 + uc 3.5.5 (PyPI), websocket-client stack; pytest green in Docker. Remaining: ≥2 website_actions E2E + optional smoke for phases 1–2.",
   "meta": {
     "last_updated": "2026-04-06",
     "branch": "feat/upgrade"

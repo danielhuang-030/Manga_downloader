@@ -18,7 +18,7 @@
 | **階段 2** — `Dockerfile`（apt keyring、移除舊 chromedriver zip、`DISPLAY`） | 已改；`docker build` 已成功（映像內 **Google Chrome 146.0.7680.177**）；**容器內一條 E2E** 仍待你方跑通 |
 | **階段 3** — Python **3.12** 基底 + 依賴 | 完成：`FROM python:3.12-bookworm`；`requirements.txt` 增 **setuptools**（供 uc 在 3.12 使用 `distutils`）；映像內 `pip check` + `pytest` **12 passed** |
 | 本機執行 `pytest` 全綠 | 待開發者於具 pip 環境執行（或沿用容器驗證） |
-| [upgrade-details.md](./upgrade-details.md) 階段 4（Selenium／uc 升級 + 多站台 E2E） | 未開始 |
+| **階段 4** — Selenium／uc 與傳遞依賴 | **Selenium 4.41.0**；**undetected-chromedriver 3.5.5**（PyPI 最新）；新增 **websocket-client**；映像內 `pip check` + `pytest` **12 passed**；**≥2 站台 E2E** 仍待你方跑通 |
 
 **近期 commit：** `0c327f4`（pytest）、`472412d`（Trellis 任務與 upgrade-details）；進度寫入見 `feat/upgrade` 上 `docs(trellis): record selenium+uc upgrade task progress` 等（`git log --oneline .trellis/tasks/04-06-selenium-uc-stack-upgrade/`）。
 
