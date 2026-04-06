@@ -1,3 +1,5 @@
+**Languages / 語言:** English | [正體中文](README.zh-TW.md)
+
 # NEW METHOD FOR BW TO TRY!
 
 # New Version
