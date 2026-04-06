@@ -1,0 +1,35 @@
+# Selenium + uc stack upgrade
+
+## 任務合併
+
+原任務 **`04-06-assess-tech-stack-upgrades`**（技術堆疊升級**評估**）已合併至本目錄：評估全文見 [assessment.md](./assessment.md)，並已將該任務**歸檔**至 `.trellis/tasks/archive/`。此後以本目錄為單一「評估 + 設計 + 實作」任務。
+
+## Goal
+
+在**維持 Selenium + undetected-chromedriver 架構**的前提下，分階段升級 Python、依賴與 Docker／Chrome／driver，解除 EOL 與容器脆弱性；驗證以端到端下載為主。
+
+## Requirements
+
+- 依 [design.md](./design.md) 之分階段順序實作；重大變更需可回滾。
+- 不遷移至 Playwright／patchright（本次範圍外）。
+- 升級後通過評估文件中的驗證清單（至少 smoke + 建議多站台）。
+
+## Acceptance Criteria
+
+- [ ] 階段 0–1：`requirements.txt` 更新後 `pip check` 通過，且至少一條下載 smoke 通過。
+- [ ] 階段 2：`docker build` 成功；容器內一條 E2E 通過。
+- [ ] 階段 3：Python 目標版本下依賴可安裝；E2E 通過。
+- [ ] 階段 4：Selenium／uc 升級後，**至少兩個** `website_actions` 站台 E2E 通過。
+- [ ] 設計決策與已知風險已記錄（README 或任務筆記）。
+
+## Technical Approach
+
+見 [design.md](./design.md)。評估依據見 [assessment.md](./assessment.md)。**升級細節定案**見 [upgrade-details.md](./upgrade-details.md)。
+
+## Out of Scope
+
+- Playwright／patchright 遷移、大規模重構 `website_actions` API。
+
+## Definition of Done
+
+- 各階段 PR／commit 可審查；主要驗證步驟可重現（命令或簡短說明）。
