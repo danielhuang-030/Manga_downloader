@@ -11,7 +11,6 @@ __pycache__/
 build/
 develop-eggs/
 dist/
-downloads/
 eggs/
 .eggs/
 lib/
@@ -125,7 +124,10 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
-# Bookwalker debug dumps (may contain cookies / personal data)
+# --- Manga_downloader: download output & sensitive debug (PII / large files) ---
+downloads/
+error.html
+error.png
 debug_bookwalker_nfbr_timeout.html
 debug_bookwalker_nfbr_timeout.png
 
