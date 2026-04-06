@@ -6,15 +6,11 @@ Add a new session to journal file and update index.md.
 Usage:
     python3 add_session.py --title "Title" --commit "hash" --summary "Summary"
     echo "content" | python3 add_session.py --title "Title" --commit "hash"
-
-When run from Cursor's agent terminal, append >/dev/null 2>&1 to avoid hangs (this script logs to stderr).
-On Linux/WSL/macOS use /dev/null (not "del/null").
 """
 
 from __future__ import annotations
 
 import argparse
-import os
 import re
 import subprocess
 import sys
@@ -291,18 +287,11 @@ def _auto_commit_workspace(repo_root: Path) -> None:
     if result.returncode == 0:
         print("[OK] No workspace changes to commit.", file=sys.stderr)
         return
-    commit_env = {
-        **os.environ,
-        "GIT_EDITOR": ":",
-        "EDITOR": ":",
-        "GIT_TERMINAL_PROMPT": "0",
-    }
     commit_result = subprocess.run(
         ["git", "commit", "-m", commit_msg],
         cwd=repo_root,
         capture_output=True,
         text=True,
-        env=commit_env,
     )
     if commit_result.returncode == 0:
         print(f"[OK] Auto-committed: {commit_msg}", file=sys.stderr)
