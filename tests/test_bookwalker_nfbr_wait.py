@@ -63,3 +63,51 @@ class TestBookwalkerTwLoginGateInMarkup:
 
     def test_empty(self, fn):
         assert fn('') is False
+
+
+class TestEnsureNfbrMoveToPageReady:
+    """ensure_nfbr_move_to_page_ready — probe script result."""
+
+    @pytest.fixture
+    def ensure(self):
+        from website_actions.bookwalker_nfbr_wait import ensure_nfbr_move_to_page_ready
+
+        return ensure_nfbr_move_to_page_ready
+
+    def test_ok(self, ensure):
+        d = MagicMock()
+        d.execute_script.return_value = {'ok': True, 'keys': ['X3N']}
+        ensure(d)
+
+    def test_raises_when_not_ok(self, ensure):
+        d = MagicMock()
+        d.execute_script.return_value = {
+            'ok': False,
+            'err': 'no NFBR page mover resolved',
+            'keys': ['a', 'b'],
+        }
+        with pytest.raises(RuntimeError) as ei:
+            ensure(d)
+        assert 'no NFBR page mover' in str(ei.value)
+        assert 'keys=' in str(ei.value)
+
+
+class TestResolveNfbrMenuAccessorCompat:
+    """resolve_nfbr_menu_accessor still exists; delegates to ensure and returns placeholders."""
+
+    def test_returns_deep_tuple(self):
+        from website_actions.bookwalker_nfbr_wait import resolve_nfbr_menu_accessor
+
+        d = MagicMock()
+        d.execute_script.return_value = {'ok': True, 'keys': []}
+        assert resolve_nfbr_menu_accessor(d) == ('', 'deep')
+
+
+class TestNfbrMoveToPage:
+    def test_invokes_execute_script_with_page(self):
+        from website_actions.bookwalker_nfbr_wait import nfbr_move_to_page
+
+        d = MagicMock()
+        nfbr_move_to_page(d, 7)
+        d.execute_script.assert_called_once()
+        assert d.execute_script.call_args[0][1] == 7

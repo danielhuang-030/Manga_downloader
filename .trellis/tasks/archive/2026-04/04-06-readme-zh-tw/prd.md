@@ -22,3 +22,11 @@ Provide a Traditional Chinese (zh-TW) README alongside the existing English `REA
 
 - Prefer terminology consistent with Taiwan Traditional Chinese for UI/instructions where ambiguous.
 - Preserve upstream attribution and release links; translate surrounding prose only.
+
+---
+
+## Follow-up (2026-04-06)
+
+- English `README.md` was later **replaced** with a project-focused English version aligned with `README.zh-TW.md` (no longer a line-by-line translation of the old upstream-long README).
+- **Fork 自 / Forked from** links to [xuzhengyi1995/Manga_downloader](https://github.com/xuzhengyi1995/Manga_downloader) were added to both READMEs.
+- Tracked in task: `04-06-readme-sync-fork` (`readme-sync-fork`).

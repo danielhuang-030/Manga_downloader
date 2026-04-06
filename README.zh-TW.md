@@ -2,6 +2,8 @@
 
 # Manga_downloader 使用說明（正體中文）
 
+**Fork 自：** [github.com/xuzhengyi1995/Manga_downloader](https://github.com/xuzhengyi1995/Manga_downloader)
+
 以 **Python**、**Selenium** 與 **undetected_chromedriver** 驅動 **Google Chrome／Chromium**，從已實作之網站閱讀器擷取頁面圖像並存成檔案。請僅在合法、符合服務條款與個人備份範圍內使用。
 
 ---
@@ -169,4 +171,6 @@ tests/               # pytest
 
 ## 其他語言
 
-完整英文說明（含上游專案歷史與較長版本紀錄）見 [README.md](README.md)。
+英文版（與本文件結構對應）：[README.md](README.md)。
+
+上游作者之 BW Chromium 下載器等歷史說明與 release，見 [原始儲存庫](https://github.com/xuzhengyi1995/Manga_downloader)。

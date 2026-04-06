@@ -17,6 +17,242 @@ from selenium.webdriver.common.by import By
 # Same ID as bookwalker_*_actions.get_sum_page_count
 _PAGE_SLIDER_ID = 'pageSliderCounter'
 
+# Bundles vary: classic menu.options.a6l.moveToPage, renamed methods, or deep graph — multi-strategy.
+_NFBR_DEEP_FIND_HOLDER_JS = """
+function __nfbrOwnKeys(o) {
+  try {
+    if (typeof Reflect !== 'undefined' && Reflect.ownKeys) return Reflect.ownKeys(o);
+  } catch (e0) {}
+  try {
+    return Object.getOwnPropertyNames(o);
+  } catch (e1) {
+    try {
+      return Object.keys(o);
+    } catch (e2) {
+      return [];
+    }
+  }
+}
+function __nfbrShouldSkipRecurse(o) {
+  if (o == null) return true;
+  var t = typeof o;
+  if (t !== 'object' && t !== 'function') return true;
+  try {
+    if (o === window || o === document) return true;
+    if (typeof o.nodeType === 'number') return true;
+  } catch (e) {}
+  return false;
+}
+function __nfbrWrapA6lMethod(a6l, fn) {
+  return {
+    moveToPage: function (p) {
+      return fn.call(a6l, p);
+    }
+  };
+}
+function __nfbrScanA6lForPageMethod(a6l) {
+  if (!a6l || typeof a6l !== 'object') return null;
+  var names = __nfbrOwnKeys(a6l);
+  var i;
+  for (i = 0; i < names.length; i++) {
+    try {
+      var fn = a6l[names[i]];
+      if (typeof fn !== 'function') continue;
+      if (names[i] === 'moveToPage') return __nfbrWrapA6lMethod(a6l, fn);
+    } catch (e0) {}
+  }
+  for (i = 0; i < names.length; i++) {
+    try {
+      var f2 = a6l[names[i]];
+      if (typeof f2 !== 'function' || f2.length > 4) continue;
+      var src = Function.prototype.toString.call(f2);
+      if (src.indexOf('moveToPage') !== -1 || src.indexOf('pageSliderCounter') !== -1) {
+        return __nfbrWrapA6lMethod(a6l, f2);
+      }
+    } catch (e1) {}
+  }
+  return null;
+}
+function __nfbrClassicMenuChains(init) {
+  if (!init || typeof init !== 'object') return null;
+  var keys = Object.keys(init);
+  var i;
+  for (i = 0; i < keys.length; i++) {
+    try {
+      var node = init[keys[i]];
+      if (!node) continue;
+      var m = node.menu;
+      if (!m && node.views_) m = node.views_.menu;
+      if (!m || !m.options || !m.options.a6l) continue;
+      var a6 = m.options.a6l;
+      if (typeof a6.moveToPage === 'function') return a6;
+      var w = __nfbrScanA6lForPageMethod(a6);
+      if (w) return w;
+    } catch (e) {}
+  }
+  return null;
+}
+function __nfbrDeepFindAnyOptionsA6l(init) {
+  var visited = new WeakSet();
+  function walk(o, depth, maxDepth) {
+    if (o == null || depth > maxDepth) return null;
+    if (__nfbrShouldSkipRecurse(o)) return null;
+    try {
+      if (visited.has(o)) return null;
+      visited.add(o);
+    } catch (e0) {
+      return null;
+    }
+    try {
+      if (o.options && o.options.a6l) {
+        var a6 = o.options.a6l;
+        if (typeof a6.moveToPage === 'function') return a6;
+        var w = __nfbrScanA6lForPageMethod(a6);
+        if (w) return w;
+      }
+    } catch (e1) {}
+    var ks = __nfbrOwnKeys(o);
+    var j;
+    for (j = 0; j < Math.min(ks.length, 320); j++) {
+      try {
+        var ch = o[ks[j]];
+        if (typeof ch === 'object' || typeof ch === 'function') {
+          var f = walk(ch, depth + 1, maxDepth);
+          if (f) return f;
+        }
+      } catch (e2) {}
+    }
+    return null;
+  }
+  return walk(init, 0, 36);
+}
+function __nfbrDeepFindMoveHolder(init) {
+  function tryHolder(o) {
+    try {
+      if (o && typeof o.moveToPage === 'function') return o;
+    } catch (e0) {}
+    try {
+      if (o && o.a6l && typeof o.a6l.moveToPage === 'function') return o.a6l;
+    } catch (e1) {}
+    return null;
+  }
+  function deepFind(o, depth, maxDepth, visited) {
+    if (o == null || depth > maxDepth) return null;
+    if (__nfbrShouldSkipRecurse(o)) return null;
+    try {
+      if (visited.has(o)) return null;
+      visited.add(o);
+    } catch (e2) {
+      return null;
+    }
+    var h = tryHolder(o);
+    if (h) return h;
+    var ks = __nfbrOwnKeys(o);
+    var maxK = Math.min(ks.length, 320);
+    var i;
+    for (i = 0; i < maxK; i++) {
+      try {
+        var child = o[ks[i]];
+        var found = deepFind(child, depth + 1, maxDepth, visited);
+        if (found) return found;
+      } catch (e5) {}
+    }
+    return null;
+  }
+  var visited = new WeakSet();
+  var h = deepFind(init, 0, 36, visited);
+  if (h) return h;
+  try {
+    var ag = NFBR && NFBR.a6G;
+    if (ag && ag !== init) {
+      visited = new WeakSet();
+      h = deepFind(ag, 0, 36, visited);
+      if (h) return h;
+    }
+  } catch (e6) {}
+  try {
+    var root = NFBR;
+    if (root && root !== init) {
+      visited = new WeakSet();
+      h = deepFind(root, 0, 28, visited);
+      if (h) return h;
+    }
+  } catch (e7) {}
+  return null;
+}
+function __nfbrResolveMoveHolder() {
+  var init = NFBR && NFBR.a6G && NFBR.a6G.Initializer;
+  if (!init) return null;
+  var h = __nfbrClassicMenuChains(init);
+  if (h) return h;
+  h = __nfbrDeepFindAnyOptionsA6l(init);
+  if (h) return h;
+  h = __nfbrDeepFindMoveHolder(init);
+  return h;
+}
+"""
+
+_NFBR_PROBE_MOVE_SCRIPT = (
+    _NFBR_DEEP_FIND_HOLDER_JS
+    + """
+return (function () {
+  try {
+    var init = NFBR && NFBR.a6G && NFBR.a6G.Initializer;
+    if (!init) return { ok: false, err: 'NFBR.a6G.Initializer missing' };
+    var h = __nfbrResolveMoveHolder();
+    if (h) return { ok: true, keys: Object.keys(init) };
+    return { ok: false, err: 'no NFBR page mover resolved', keys: Object.keys(init) };
+  } catch (e) {
+    return { ok: false, err: String(e) };
+  }
+})();
+"""
+)
+
+_NFBR_MOVE_TO_PAGE_SCRIPT = (
+    _NFBR_DEEP_FIND_HOLDER_JS
+    + """
+var page = arguments[0];
+var init = NFBR && NFBR.a6G && NFBR.a6G.Initializer;
+if (!init) throw new Error('NFBR.a6G.Initializer missing');
+var holder = __nfbrResolveMoveHolder();
+if (!holder || typeof holder.moveToPage !== 'function') {
+  throw new Error('NFBR moveToPage holder not found');
+}
+holder.moveToPage(page);
+return true;
+"""
+)
+
+
+def ensure_nfbr_move_to_page_ready(driver):
+    """
+    Confirm we can find an object with moveToPage under NFBR.a6G.Initializer (minified keys OK).
+    """
+    raw = driver.execute_script(_NFBR_PROBE_MOVE_SCRIPT)
+    if not raw or not raw.get('ok'):
+        err = (raw or {}).get('err', 'unknown')
+        keys = (raw or {}).get('keys')
+        detail = ' keys=%s' % (keys,) if keys is not None else ''
+        raise RuntimeError(
+            'Bookwalker: could not resolve NFBR moveToPage (%s).%s' % (err, detail)
+        )
+
+
+def nfbr_move_to_page(driver, page):
+    """Invoke moveToPage using the same deep discovery as ensure_nfbr_move_to_page_ready."""
+    driver.execute_script(_NFBR_MOVE_TO_PAGE_SCRIPT, page)
+
+
+def resolve_nfbr_menu_accessor(driver):
+    """
+    Back-compat: older Bookwalker bundles used a fixed Initializer.<name>.menu chain.
+
+    Now we only verify deep search works; return placeholders (call sites use nfbr_move_to_page).
+    """
+    ensure_nfbr_move_to_page_ready(driver)
+    return '', 'deep'
+
 
 class BookwalkerSessionError(Exception):
     """
