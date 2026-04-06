@@ -93,6 +93,7 @@
 | 日期 | 變更 |
 |------|------|
 | 2026-04-06 | 初版：brainstorming 定案 |
+| 2026-04-06 | 進度：`task.json` 設為 `in_progress`、`current_phase` 1；已提交 pytest 骨架（0c327f4）；階段 0–4 實作仍待進行 |
 
 ---
 

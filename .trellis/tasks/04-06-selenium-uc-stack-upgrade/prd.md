@@ -4,6 +4,20 @@
 
 原任務 **`04-06-assess-tech-stack-upgrades`**（技術堆疊升級**評估**）已合併至本目錄：評估全文見 [assessment.md](./assessment.md)，並已將該任務**歸檔**至 `.trellis/tasks/archive/`。此後以本目錄為單一「評估 + 設計 + 實作」任務。
 
+## 目前進度（2026-04-06）
+
+| 項目 | 狀態 |
+|------|------|
+| 任務狀態 | `in_progress`（見 `task.json`） |
+| 分支 | `feat/upgrade` |
+| 評估／合併／歸檔 | 完成 |
+| [design.md](./design.md) + [upgrade-details.md](./upgrade-details.md)（brainstorming 定案） | 完成 |
+| Pytest 單元測試骨架（`tests/test_downloader_helpers.py`、`requirements-dev.txt`、`pytest.ini`） | 已提交 **0c327f4** |
+| 本機執行 `pytest` 全綠 | 待開發者於具 pip 環境執行 |
+| [upgrade-details.md](./upgrade-details.md) 階段 0–4 實際升級 | 未開始 |
+
+**近期 commit：** `0c327f4`（測試）、`472412d`（Trellis 任務目錄與 upgrade-details）。
+
 ## Goal
 
 在**維持 Selenium + undetected-chromedriver 架構**的前提下，分階段升級 Python、依賴與 Docker／Chrome／driver，解除 EOL 與容器脆弱性；驗證以端到端下載為主。
@@ -16,7 +30,7 @@
 
 ## Acceptance Criteria
 
-- [ ] **單元測試：** `pip install -r requirements.txt -r requirements-dev.txt` 後 `pytest` 全數通過（見 repo 根目錄 `tests/`）。
+- [ ] **單元測試：** `pip install -r requirements.txt -r requirements-dev.txt` 後 `pytest` 全數通過（見 repo 根目錄 `tests/`）。（測試檔已加入，**需本機／CI 跑通**後可勾選。）
 - [ ] 階段 0–1：`requirements.txt` 更新後 `pip check` 通過，且至少一條下載 smoke 通過。
 - [ ] 階段 2：`docker build` 成功；容器內一條 E2E 通過。
 - [ ] 階段 3：Python 目標版本下依賴可安裝；E2E 通過。

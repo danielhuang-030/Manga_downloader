@@ -1,7 +1,7 @@
 # Design：Selenium + undetected-chromedriver 堆疊升級
 
 **任務目錄：** `04-06-selenium-uc-stack-upgrade`  
-**狀態：** Approved — 升級細節見 [upgrade-details.md](./upgrade-details.md)  
+**狀態：** Approved — 升級細節見 [upgrade-details.md](./upgrade-details.md)；實作進度見 [prd.md](./prd.md)「目前進度」  
 **日期：** 2026-04-06（brainstorming 定案細節：2026-04-06）  
 **相關評估：** [assessment.md](./assessment.md)（與本任務同目錄）
 
