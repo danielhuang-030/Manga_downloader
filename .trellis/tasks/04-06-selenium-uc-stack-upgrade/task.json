@@ -33,7 +33,7 @@
       "action": "create-pr"
     }
   ],
-  "commit": "58d69c8",
+  "commit": "0c327f4",
   "pr_url": null,
   "subtasks": [
     {
@@ -83,7 +83,7 @@
     "requirements-dev.txt",
     "pytest.ini"
   ],
-  "notes": "2026-04-06: Planning + docs + pytest on feat/upgrade. Code: 0c327f4 (pytest). Task docs: dafd1d4 (progress), 472412d (upgrade-details bundle). Next: pytest locally, phase 0 tag, phase 1 pins.",
+  "notes": "2026-04-06: in_progress; pytest scaffold 0c327f4; task/progress docs in later commits on feat/upgrade — see git log. Next: pytest locally, phase 0 tag, phase 1 pins per upgrade-details.md.",
   "meta": {
     "last_updated": "2026-04-06",
     "branch": "feat/upgrade"
