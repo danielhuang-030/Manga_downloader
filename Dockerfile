@@ -33,4 +33,7 @@ RUN pip install -r requirements.txt \
 # Record runtime versions for upgrade notes (driver comes from uc at runtime).
 RUN python --version && google-chrome-stable --version
 
-CMD python main.py
+# 預設不自動下載；請以 run 覆寫指令，例如：
+#   docker compose run --rm python python main_env.py
+#   docker compose run --rm python python main.py
+CMD ["sleep", "infinity"]

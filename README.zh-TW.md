@@ -47,6 +47,58 @@ pip install -r requirements.txt
 pip install -r requirements-dev.txt
 ```
 
+### 以容器執行測試（建議與 CI 一致）
+
+需已安裝 **Docker** 與 **Docker Compose**。於專案根目錄：
+
+```bash
+# 先建置映像（首次或 Dockerfile／依賴變更後）
+docker compose build python
+
+# 跑全部測試（等同在映像內執行 python -m pytest tests/ -v）
+./scripts/docker-test.sh
+```
+
+若 `.env` 內含會被 Compose 誤解的 `$`，請改用：
+
+```bash
+docker compose --env-file compose.env run --rm python python -m pytest tests/ -v
+```
+
+（`compose.env` 可為空檔或只含必要變數，避免讀取專案 `.env` 做 YAML 替換。）
+
+傳給 pytest 的額外參數可直接加在腳本後方，例如：`./scripts/docker-test.sh tests/test_env_store.py -q`
+
+---
+
+## Web UI（本機，選用）
+
+應用程式**固定**監聽 **`127.0.0.1:8765`**（見 `run_web_ui.py`），不從 `.env` 讀取監聽位址或埠。
+
+本機直接執行：
+
+```bash
+python run_web_ui.py
+```
+
+瀏覽器開啟 `http://127.0.0.1:8765/` 可編輯 `.env`、啟動下載，並以 **SSE** 檢視進度。請勿將服務暴露於公開網路。
+
+### 以 Docker Compose 對外連接埠（可調）
+
+容器內仍固定 **`0.0.0.0:8765`**（由 Compose 的 `uvicorn` 指令寫死）。**主機對外埠**可透過環境變數 **`MANGA_WEB_PORT`** 設定（給 Compose 做 YAML 替換用，可寫在專案根目錄 `.env`，**不**由 Python 讀取）：
+
+| 設定 | 說明 |
+|------|------|
+| 未設定 | 主機 `8765` → 容器 `8765` |
+| `MANGA_WEB_PORT=9000` | 主機 `9000` → 容器 `8765` |
+
+```bash
+docker compose build web
+docker compose up web
+```
+
+範例：`.env` 內 `MANGA_WEB_PORT=9000` 時，主機請開 `http://127.0.0.1:9000/`。
+
 ---
 
 ## 使用方式一：`main_env.py`（建議：Bookwalker TW + `.env`）
@@ -122,7 +174,9 @@ python main.py
   docker compose --env-file compose.env run --rm python python -m pytest tests/ -v
   ```
 
-預設 `CMD` 為 `python main.py`；Viewer 流程請在容器內改執行 `python main_env.py` 或覆寫指令。
+映像預設 **`CMD` 為 `sleep infinity`**；**`docker-compose.yml` 的 `python` 服務另設 `command: sleep infinity`**，會覆寫映像 CMD，避免本機仍使用舊映像時仍執行 `python main.py`。更新 compose 後請 **`docker compose up -d --force-recreate`**（或先 `down` 再 `up`）讓容器套用新設定。
+
+手動下載請自行執行，例如：`docker compose run --rm python python main_env.py` 或 `docker compose run --rm python python main.py`。
 
 ---
 

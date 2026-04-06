@@ -13,8 +13,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from config import load_manga_config
-from downloader import Downloader
 from main import settings
 
 if TYPE_CHECKING:
@@ -43,9 +41,9 @@ def downloader_kwargs_for_env(cfg: "MangaConfig") -> dict:
 
 
 def main():
-    cfg = load_manga_config()
-    downloader = Downloader(**downloader_kwargs_for_env(cfg))
-    downloader.download()
+    from download_runner import run_download_from_dotenv
+
+    run_download_from_dotenv()
 
 
 if __name__ == "__main__":

@@ -1,0 +1,74 @@
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  padding: 1rem 1.25rem 2rem;
+  line-height: 1.5;
+  color: #1a1a1a;
+  background: #f6f6f6;
+}
+
+main {
+  max-width: 52rem;
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: 1.35rem;
+}
+
+.hint {
+  color: #444;
+  font-size: 0.9rem;
+}
+
+.panel {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem 1.1rem;
+  margin-top: 1rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.65rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+input,
+textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 0.25rem;
+  padding: 0.4rem 0.5rem;
+  font: inherit;
+}
+
+button {
+  font: inherit;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+}
+
+.msg {
+  min-height: 1.25rem;
+  font-size: 0.9rem;
+}
+
+.msg.error {
+  color: #b00020;
+}
+
+.log {
+  max-height: 22rem;
+  overflow: auto;
+  background: #111;
+  color: #e8e8e8;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

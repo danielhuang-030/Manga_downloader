@@ -47,6 +47,51 @@ pip install -r requirements.txt
 pip install -r requirements-dev.txt
 ```
 
+### Run tests in a container (matches Dockerfile / CI)
+
+Requires **Docker** and **Docker Compose**. From the project root:
+
+```bash
+docker compose build python
+./scripts/docker-test.sh
+```
+
+If Compose warns about `$` in your project `.env`, use a dedicated env file for Compose:
+
+```bash
+docker compose --env-file compose.env run --rm python python -m pytest tests/ -v
+```
+
+Pass extra pytest args after the script, e.g. `./scripts/docker-test.sh tests/test_env_store.py -q`.
+
+---
+
+## Web UI (local, optional)
+
+The app **always** binds **`127.0.0.1:8765`** when you run `run_web_ui.py` (hardcoded; not read from `.env`).
+
+```bash
+python run_web_ui.py
+```
+
+Open `http://127.0.0.1:8765/` to edit `.env`, start downloads, and stream progress over **SSE**. Do not expose this service to untrusted networks.
+
+### Docker Compose: published (host) port
+
+Inside the container the server listens on **`0.0.0.0:8765`** (fixed in `docker-compose.yml`). Only the **host port** is configurable via **`MANGA_WEB_PORT`** for Compose variable substitution (you can put it in the project root `.env` for Docker; the Python app does not read it).
+
+| Setting | Mapping |
+|---------|---------|
+| (unset) | host `8765` → container `8765` |
+| `MANGA_WEB_PORT=9000` | host `9000` → container `8765` |
+
+```bash
+docker compose build web
+docker compose up web
+```
+
+Example: with `MANGA_WEB_PORT=9000` in `.env`, open `http://127.0.0.1:9000/` on the host.
+
 ---
 
 ## Usage A: `main_env.py` (recommended for Bookwalker TW + `.env`)
@@ -122,7 +167,9 @@ python main.py
   docker compose --env-file compose.env run --rm python python -m pytest tests/ -v
   ```
 
-The image default `CMD` is `python main.py`; for viewer flow run `python main_env.py` inside the container or override the command.
+The image default `CMD` is `sleep infinity`, and the **`python` service in `docker-compose.yml` sets `command: sleep infinity`** to override the image CMD (so old cached images that still had `python main.py` do not auto-run). After pulling compose changes, recreate containers: `docker compose up -d --force-recreate` (or `docker compose down` then `up`).
+
+Run downloads explicitly, e.g. `docker compose run --rm python python main_env.py` or `python main.py`.
 
 ---
 

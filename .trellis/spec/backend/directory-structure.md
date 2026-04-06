@@ -6,7 +6,7 @@
 
 ## Overview
 
-This repository is a **Python 3.8** command-line tool that drives **Chrome via Selenium** (`undetected-chromedriver`) to capture manga pages from supported sites. There is **no separate API server**; the “backend” is the Python package at the repo root plus per-site adapters.
+This repository is a **Python 3.12** command-line tool that drives **Chrome via Selenium** (`undetected-chromedriver`) to capture manga pages from supported sites. There is **no separate API server**; the “backend” is the Python package at the repo root plus per-site adapters.
 
 ---
 
@@ -17,7 +17,7 @@ Manga_downloader/
 ├── main.py                 # User entry: settings dict + Downloader(**settings).download()
 ├── downloader.py         # Chrome setup, cookie login, download loop, orchestration
 ├── requirements.txt      # Pinned dependencies (selenium, Pillow, undetected-chromedriver, …)
-├── Dockerfile            # Python 3.8 + Chrome/Chromedriver image; CMD python main.py
+├── Dockerfile            # Python 3.12 + Chrome; default CMD sleep infinity (run main.py / main_env.py manually)
 ├── docker-compose.yml    # Mounts repo at /app
 └── website_actions/      # Per-site implementations of WebsiteActions
     ├── __init__.py       # Dynamic export of sibling modules (glob); enables `from website_actions import *`
