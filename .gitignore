@@ -128,7 +128,9 @@ dmypy.json
 main copy.py
 
 # --- Manga_downloader: download output & sensitive debug (PII / large files) ---
-downloads/
+# Track downloads/ in git via downloads/.gitignore only; ignore all real content below it.
+downloads/**
+!downloads/.gitignore
 error.html
 error.png
 debug_bookwalker_nfbr_timeout.html
