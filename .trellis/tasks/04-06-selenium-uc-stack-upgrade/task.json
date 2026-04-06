@@ -45,7 +45,10 @@
     ".trellis/tasks/04-06-selenium-uc-stack-upgrade/prd.md",
     "requirements.txt",
     "Dockerfile",
-    "downloader.py"
+    "downloader.py",
+    "tests/test_downloader_helpers.py",
+    "requirements-dev.txt",
+    "pytest.ini"
   ],
   "notes": "Merged assess task; assessment + design + upgrade-details (brainstorming) in this folder.",
   "meta": {}

@@ -71,7 +71,7 @@
 | 階段 | 動作要點 | 通過條件 |
 |------|----------|----------|
 | **0** | Tag；記錄 Chrome／driver（若可得） | 現行流程可跑 |
-| **1** | 升級 Pillow、requests（連帶 urllib3）；必要時 Selenium **僅小版** | `pip check` + 至少 1 smoke + 裁切路徑若有用到 |
+| **1** | 升級 Pillow、requests（連帶 urllib3）；必要時 Selenium **僅小版** | `pip check` + **`pytest`** 全綠 + 至少 1 smoke + 裁切路徑若有用到 |
 | **2** | apt 現代化；刪舊 chromedriver 下載；首選 B、備援 A；處理 `DISPLAY` | `docker build` + 1 E2E |
 | **3** | Base image 改 **Python 3.12**（失敗則 3.11）；`pip install -r requirements.txt` | 全依賴安裝 + E2E |
 | **4** | 依 uc／Selenium release notes **成對**評估後升級 | **≥2 站台** E2E |

@@ -1,0 +1,2 @@
+# Development / CI: pip install -r requirements.txt -r requirements-dev.txt
+pytest>=7.4.0

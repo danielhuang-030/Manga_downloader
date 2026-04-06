@@ -16,6 +16,7 @@
 
 ## Acceptance Criteria
 
+- [ ] **單元測試：** `pip install -r requirements.txt -r requirements-dev.txt` 後 `pytest` 全數通過（見 repo 根目錄 `tests/`）。
 - [ ] 階段 0–1：`requirements.txt` 更新後 `pip check` 通過，且至少一條下載 smoke 通過。
 - [ ] 階段 2：`docker build` 成功；容器內一條 E2E 通過。
 - [ ] 階段 3：Python 目標版本下依賴可安裝；E2E 通過。
