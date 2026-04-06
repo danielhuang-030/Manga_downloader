@@ -1,427 +1,176 @@
-# NEW METHOD FOR BW TO TRY!
+**Languages / 語言:** English | [正體中文](README.zh-TW.md)
 
-# New Version
-## v0.3.3 (Update Recommended)
-- Update to Chromium 112.0.5590.0.
-- Better support for BW books page number pattern, support novels.
+# Manga_downloader
 
-Download it in the [release](https://github.com/xuzhengyi1995/Manga_downloader/releases/tag/BW-downloader-chrome-v0.3.3) or here: [Windows x64 release build v0.3.3](https://github.com/xuzhengyi1995/Manga_downloader/releases/download/BW-downloader-chrome-v0.3.3/BW-downloader-chrome-v0.3.3.7z)
+**Forked from:** [github.com/xuzhengyi1995/Manga_downloader](https://github.com/xuzhengyi1995/Manga_downloader)
 
-## v0.3.2
-This version has some good features below for BW:
-- Could download the cover (If the cover image is jpeg, please check it or better convert it to png before you share it, because the jpeg file will contain your BW account info).
-- Could name the image automictically using the page number, you can start at any page you want and go forward or go back!
-- Could name the folder with the BW uuid but not a random one anymore.
-- No more blank or repeating page will be skipped, no more image hash to check repeating page, better performance.
+This project uses **Python**, **Selenium**, and **undetected_chromedriver** to drive **Google Chrome / Chromium** and capture page images from supported site readers into files. Use it only where permitted by law, the platform’s terms of service, and personal backup norms.
 
-Example screenshot:
-![1670681578(1)](https://user-images.githubusercontent.com/29002064/206859972-0c775ee2-02fd-4d62-8870-4cd262fc6116.jpg)
+---
 
-If you find the file name all become "cover_or_extra_xxx" when downloading some manga, please file a bug, there may be more URL patterns in BW than I have seen or they changed the pattern, it should be covered to make the page number working correctly.
+## Overview
 
-Download it in the [release](https://github.com/xuzhengyi1995/Manga_downloader/releases/tag/BW-downloader-chrome-v0.3.2) or here: [Windows x64 release build v0.3.2](https://github.com/xuzhengyi1995/Manga_downloader/releases/download/BW-downloader-chrome-v0.3.2/BW-downloader-chrome-v0.3.2.7z)
+- **List mode** (`python main.py`): set multiple `manga_url` entries and matching `imgdir` values in `settings` in `main.py`, log in once, then download in order.
+- **Viewer / environment mode** (`python main_env.py`): read `MANGA_IDS`, cookies, resolution, and more from a `.env` file in the project root; values **not** overridden by the environment are merged from `settings` in `main.py` (e.g. `loading_wait_time`, `cut_image`, page range). Download folders are created under `downloads/` from the **browser tab title** (see below).
 
-## v0.3.1
-This version has improved the performance about saving snapshot, if you have some problems that the browser become very slow during downloading, please try the new version.
+Site-specific logic lives under `website_actions/`; `Downloader` picks the implementation by URL.
 
-Download it in the [release](https://github.com/xuzhengyi1995/Manga_downloader/releases/tag/BW-downloader-chrome-v0.3.1) or here: [Windows x64 release build v0.3.1](https://github.com/xuzhengyi1995/Manga_downloader/releases/download/BW-downloader-chrome-v0.3.1/BW-downloader-chrome-v0.3.1.7z)
+---
 
-## v0.3
-Fixed the problem that some manga has width less than 800px could not be downloaded, see [#113](/../../issues/113).
+## Supported sites (registered in code)
 
-Download it in the [release](https://github.com/xuzhengyi1995/Manga_downloader/releases/tag/BW-downloader-chrome-v0.3) or here: [Windows x64 release build v0.3](https://github.com/xuzhengyi1995/Manga_downloader/releases/download/BW-downloader-chrome-v0.3/BW-downloader-chrome-v0.3.7z)
+| Module | Site |
+|--------|------|
+| `bookwalker_tw_actions` | Bookwalker Taiwan (`bookwalker.com.tw`) |
+| `bookwalker_jp_actions` | Bookwalker Japan (`bookwalker.jp`) |
+| `cmoa_jp_actions` | Cmoa manga (`cmoa.jp`) |
+| `coma_jp_novel` (`CmoaJPNovels`) | Cmoa novels |
+| `takeshobo_co_jp_actions` | Takeshobo Gamma Plus, etc. (`gammaplus.takeshobo.co.jp`) |
 
-## v0.2.1
-Pump Chromium to 109.0.5393, may fix some problems.
+If the URL does not match any `WebsiteActions.check_url`, the program raises `NotImplementedError`.
 
-Download it in the [release](https://github.com/xuzhengyi1995/Manga_downloader/releases/tag/BW-downloader-chrome-v0.2.1) or here: [Windows x64 release build v0.2.1](https://github.com/xuzhengyi1995/Manga_downloader/releases/download/BW-downloader-chrome-v0.2.1/BW-downloader-chrome-v0.2.1.7z)
+---
 
-## v0.2
-This version is based on Chromium 106.0.5243.0, the changes are below:
-- Support `https://ebook.tongli.com.tw`, will save the downloaded images in the `C:\bw_export_data\TONGLI_URL_STRING`
-- Support `https://www.dlsite.com`, but this is saving the cache images, so the final 3~4 pages should be downloaded as below (for example we have 10 pages):
-  - Go through page 1 to 10 (Make sure the current page is full loaded when you go to next page).
-  - You will find that at page 10, there are maybe only images for page 1-7.
-  - Go back from page 10 to page 5, you will find that the final pages are saved. (but maybe in reverse order)
-  - Currently we could not do anything better than this.
- - Works for `https://book.dmm.com`, use the script below to move page:
- ```js
-   window.i=0;setInterval(()=>{NFBR.a6G.Initializer.views_.menu.options.a6l.moveToPage(window.i);console.log(window.i);window.i++;},3000)
- ```
- The script above is for **DMM**, for **BW** please use the script below:
- ```js
-   window.i=0;setInterval(()=>{NFBR.a6G.Initializer.L7v.menu.options.a6l.moveToPage(window.i);console.log(window.i);window.i++;},3000)
- ```
- - Maybe slitely faster for BW and may download some images that width > height.
+## Requirements
 
-Download it in the [release](https://github.com/xuzhengyi1995/Manga_downloader/releases/tag/BW-downloader-chrome-v0.2) or here: [Windows x64 release build v0.2](https://github.com/xuzhengyi1995/Manga_downloader/releases/download/BW-downloader-chrome-v0.2/BW-downloader-chrome-v0.2.7z)
+- **Python**: 3.12 recommended (see `Dockerfile`; versions are pinned in `requirements.txt`).
+- **Browser**: **Google Chrome** or **Chromium** must be runnable locally (`downloader` detects the major version for `undetected_chromedriver` to reduce driver mismatch).
+- **OS**: Development targets Linux / containers; on Windows / macOS, verify Chrome and paths yourself.
 
-How to use (Same as the old version):
-1.  Unzip the file `BW-downloader-chrome-bin.zip`.
-2.  Open a `powsershell` or `cmd`, `cd` to the unzipped browser dir.
-3.  Open the browser with command line `.\chrome.exe --user-data-dir=c:\bw-downloader-profile --no-sandbox`
-4.  Browser the manga, manga will be saved to `C:\bw_export_data`
+---
 
-**Do not use it for other website, only use it as a Managa downloader, it is not as safe as normal chrome browser!**
+## Install
 
-# Old Version
-Download it in the [release](https://github.com/xuzhengyi1995/Manga_downloader/releases/tag/BW-downloader-chrome-v0.1) or here: [Windows x64 release build v0.1](https://github.com/xuzhengyi1995/Manga_downloader/releases/download/BW-downloader-chrome-v0.1/BW-downloader-chrome-v0.1.7z)
-
-**If you are finding something to download BW, please try this method for BW, it's really a good thing to try, you will like it!**
-
-**For coma, please see below.**
-
-Now have a new method, with a customized `chromium` browser, it can download BW original image with it's original size very easily. It can download both manga and novel, and may be used to every website that use canvas to render the page (now only tested on BW).
-
-It is only a dev version, may have bugs and may crash, but you can download the customized browser and try it now.
-
-**Do not use it for other website, only use it as a BW downloader, it is not as safe as normal chrome browser!**
-
-Clone this repo or only download the [BW-downloader-chrome-bin.zip](https://github.com/xuzhengyi1995/Manga_downloader/raw/master/BW-downloader-chrome-bin.zip)
-
-1.  Unzip the file `BW-downloader-chrome-bin.zip`.
-2.  Open a `powsershell` or `cmd`, `cd` to the unzipped browser dir.
-3.  Open the browser with command line `.\chrome.exe --user-data-dir=c:\bw-downloader-profile --no-sandbox`
-4.  Adjust your browser window size, make it smaller and can only display one manga page, example below
-    ![image](https://user-images.githubusercontent.com/29002064/139255318-95531cd9-c442-4a61-acb4-cef3d71b7190.png)
-
-
-5.  You can now go to BW website, log in and open the manga you want to download, remember to reset the manga's read status before you open it.
-6.  Press `F12`, make it a separate window (see the image below) and run the script below (just go to `console` and copy-past the code, press enter) to move the page automatically, if your network is good, you can change the `3000` to a smaller number, 3000 means 3000ms -> 3s, every 3s it will move to the next page.
-
-    You can also manually click the mouse left button / use a keyboard arrow key / use a keyboard simulation software to move the page, you can choose the way you like, just make sure the page is moving.
-    ```js
-    window.i=0;setInterval(()=>{NFBR.a6G.Initializer.L7v.menu.options.a6l.moveToPage(window.i);console.log(window.i);window.i++;},3000)
-    ```
-    
-    If this not work and show 'Uncaught TypeError: Cannot read properties of undefined (reading 'menu') at <anonymous>:1:54', it means BW has updated the js, you can try to find it in the console, just try `NFBR.a6G.Initializer.*.menu` is not `undefined` and the * is the new object name; Or you can just file a bug.
-
-    ![image](https://user-images.githubusercontent.com/29002064/138590508-e7555a2d-1528-4e59-8a50-e08e407bc1be.png)
-
-
-7.  Now you can check your `C:\bw_export_data`, you can find a random uuid folder with all the manga images in it.
-    ![image](https://user-images.githubusercontent.com/29002064/139255390-03b9191a-e90b-4572-9cde-b7e50ca9787c.png)
-
-If you want to download multiple manga at the same time, just open as many manga as you want, and do the step 5 to 6.
-
-This method is very easy to use, stable and no need to find any resolution or cookies, and it can download the real original image with no barcode.
-
-Maybe will add a new browser ui to it and can click to download in the future.
-
-May not download the cover page now.
-
-Only built on windows, no program now for other platform.
-
-If you find some problem, please file a bug, thank you!
-
-# Manga_Downloader
-
-A Manga download framework using `selenium`.
-
-**Now support the websites below:**
-
-1.  [Bookwalker.jp](https://bookwalker.jp)
-2.  [Bookwalker.com.tw](https://www.bookwalker.com.tw)
-3.  [Cmoa.jp](https://www.cmoa.jp/)
-
-**Program will check the website of given URL automaticity**
-
-**If the website you given is unsupported, the program will raise an error.**
-
-**Now support multi manga download with only login one time**
-
-**现在支持批量下载**
-
-**you should prepare the information below:**
-
-1.  Manga URL
-2.  Cookies
-3.  Image dir (Where to put the image, folder name)
-4.  Some website you should see the size of image and set it at `res`. [Cmoa.jp](https://www.cmoa.jp/) doesn't need this.
-
-# How to Use
-
-## All settings
-
-All the settings are in `main.py`.
-
-```python
-settings = {
-    # Manga urls, should be the same website
-    'manga_url': [
-        'URL_1',
-        'URL_2'
-    ],
-    # Your cookies
-    'cookies': 'YOUR_COOKIES_HERE',
-    # Folder names to store the Manga, the same order with manga_url
-    'imgdir': [
-        'IMGDIR_FOR_URL_1',
-        'IMGDIR_FOR_URL_2'
-    ],
-    # Resolution, (Width, Height), For cmoa.jp this doesn't matter.
-    'res': (1393, 2048),
-    # Sleep time for each page (Second), normally no need to change.
-    'sleep_time': 2,
-    # Time wait for page loading (Second), if your network is good, you can reduce this parameter.
-    'loading_wait_time': 20,
-    # Cut image, (left, upper, right, lower) in pixel, None means do not cut the image. This often used to cut the edge.
-    # Like (0, 0, 0, 3) means cut 3 pixel from bottom of the image.
-    'cut_image': None,
-    # File name prefix, if you want your file name like 'klk_v1_001.jpg', write 'klk_v1' here.
-    'file_name_prefix': '',
-    # File name digits count, if you want your file name like '001.jpg', write 3 here.
-    'number_of_digits': 3,
-    # Start page, if you want to download from page 3, set this to 3, None means from 0
-    'start_page': None,
-    # End page, if you want to download until page 10, set this to 10, None means until finished
-    'end_page': None,
-}
+```bash
+pip install -r requirements.txt
+# For development / tests also install:
+pip install -r requirements-dev.txt
 ```
 
-## Install environment & How to Get URL/Cookies
+---
 
-**This program now work for Chrome, if you use another browser, please check [this page](https://selenium-python.readthedocs.io/installation.html)**
+## Usage A: `main_env.py` (recommended for Bookwalker TW + `.env`)
 
-0.  Install python packages _selenium_ and _pillow_ and get the _Google chrome Drivers_.
+1. Copy the example and edit (**do not commit a `.env` with real cookies**):
 
-    1.  For _selenium_ ad _pillow_:
+   ```bash
+   cp .env.example .env
+   ```
 
-    ```shell
-    pip install selenium
-    pip install Pillow
-    # This undetected_chromedriver is prevent us from been detected by BW
-    pip install undetected_chromedriver
-    ```
+2. Fill in at least the following (see comments in `.env.example`):
 
-    2.  For Google chrome Drivers:
+   - `MANGA_COOKIES` (or compatible `BOOKWALKER_COOKIE`): cookie string in the same format as `main.py` (typically `name=value; ...`).
+   - `MANGA_RES`: width and height as `WIDTHxHEIGHT`, e.g. `1445x2048` (ASCII `x` only).
+   - `MANGA_SLEEP_TIME`: delay between pages in seconds (decimals allowed).
+   - `MANGA_IDS`: numeric `browserViewer` IDs, comma-separated.
 
-        1.  Please check your Chrome version, 'Help'->'About Google Chrome'.
+3. Optional `MANGA_VIEWER_URL_TEMPLATE`: must include `{id}`; default is Bookwalker Taiwan:
 
-        2.  Download Chrome Driver fit to your Chrome version [here](https://sites.google.com/a/chromium.org/chromedriver/downloads).
+   `https://www.bookwalker.com.tw/browserViewer/{id}/read`
 
-        3.  Put it into any folder and add the folder into the PATH.
+4. Run:
 
-    3.  For more info, I suggest you to check it [here](https://selenium-python.readthedocs.io/installation.html)
+   ```bash
+   python main_env.py
+   ```
 
+**Output location**: In viewer mode, each ID opens the matching URL and writes PNGs under **`downloads/<folder>/`**, where the folder name comes from the **page title** (via `sanitize_download_folder_name`); if the title is unusable, names like `browserViewer-<id>` are used.
 
-1.  Change the `IMGDIR` in the main.py to indicate where to put the manga.
+**Relationship to `main.py`**: `MANGA_COOKIES`, `MANGA_RES`, `MANGA_SLEEP_TIME`, and viewer-related fields come from `.env`; other keys (e.g. `loading_wait_time`, `cut_image`, `start_page`, `end_page`, `file_name_prefix`) default from `settings` in `main.py`.
 
-2.  Add your cookies in the program.
+---
 
-    **Remember to use F12 to see the cookies!**
+## Usage B: `main.py` (URL list + custom directories)
 
-    **Because some http only cookies can not be seen by javascript!**
+Edit `settings` in `main.py`:
 
-    **Remember to go to the links below to get the cookies!**
+- `manga_url`: same count as `imgdir`, and one batch should be the **same site**.
+- `imgdir`: output directory per manga (can be relative, e.g. `./downloads/example`).
+- `cookies`: exported after login; never commit real cookies.
 
-    1.  For [Bookwalker.jp] cookies, go [here](https://member.bookwalker.jp/app/03/my/profile).
-    2.  For [Bookwalker.com.tw] cookies, go [here](https://www.bookwalker.com.tw/member).
-    3.  For [www.cmoa.jp] cookies, go [here](https://www.cmoa.jp/) and you **must** get cookies by plug-in [EditThisCookie](http://www.editthiscookie.com/), download it for chrome [here](https://chrome.google.com/webstore/detail/edit-this-cookie/fngmhnnpilhplaeedifhccceomclgfbg).
+Then:
 
-    -   For `EditThisCookie`, this can be used in any website above, but for `cmoa` you **must** use this method
+```bash
+python main.py
+```
 
-        1.  Go to user preferences (chrome-extension://fngmhnnpilhplaeedifhccceomclgfbg/options_pages/user_preferences.html) of `EditThisCookie`
-        2.  Set the cookie export format to `Semicolon separated name=value pairs`
-        3.  Go to [cmoa](https://www.cmoa.jp/), click the `EditThisCookie` and click `export` button
-        4.  Copy the cookies in the file (**After the `// Example: http://www.tutorialspoint.com/javascript/javascript_cookies.htm`**) into the program
+---
 
-    -   For the traditional way
+## Environment variables (`.env`)
 
-        > 1.  Open the page.
-        > 2.  Press F12.
-        > 3.  Click on the _Network_.
-        > 4.  Refresh the page.
-        > 5.  Find the first _profile_ request, click it.
-        > 6.  On the right, there will be a _Request Headers_, go there.
-        > 7.  Find the _cookie:...._, copy the string after the _cookie:_, paste to the _main.py_, _YOUR_COOKIES_HERE_
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `MANGA_COOKIES` | one of `MANGA_COOKIES` / `BOOKWALKER_COOKIE` | Cookie string |
+| `BOOKWALKER_COOKIE` | same as above | Legacy / compatibility |
+| `MANGA_RES` | yes | `WIDTHxHEIGHT` |
+| `MANGA_SLEEP_TIME` | yes | Seconds between pages |
+| `MANGA_IDS` | yes | Comma-separated viewer IDs |
+| `MANGA_VIEWER_URL_TEMPLATE` | no | URL template with `{id}` |
+| `MANGA_HEADLESS` | no | `new` (default) / `old` / `0` to disable headless; see `downloader.py` |
 
-3.  Change the _manga_url_ in the _main.py_.
+**Docker Compose note**: If both `docker-compose.yml` and `.env` exist at the project root, Compose uses `.env` for **YAML variable substitution**, and `$` inside cookies can trigger warnings. Prefer **`docker compose --env-file compose.env ...`** (see `compose.env` and comments in `docker-compose.yml`). The app still loads the real `.env` via **python-dotenv** from the mounted project directory.
 
-    1.  For [Bookwalker.jp]
+---
 
-        First go to [購入済み書籍一覧](https://bookwalker.jp/holdBooks/), you can find all your mangas here.
+## Headless and Docker
 
-        This time the URL is the URL of **'この本を読む'** button for your manga.
+- `downloader.get_driver()` defaults to **`--headless=new`** (override with `MANGA_HEADLESS`).
+- The `Dockerfile` installs **Google Chrome stable**; `docker-compose.yml` mounts the project to `/app` and increases **`shm_size`** to reduce tab crashes.
+- Example (run tests):
 
-        Right click this button, and click **'Copy link address'**.
+  ```bash
+  docker compose --env-file compose.env run --rm python python -m pytest tests/ -v
+  ```
 
-        The URL is start with **member.bookwalker.jp**, not the **viewer.bookwalker.jp**. Here we use the manga [【期間限定　無料お試し版】あつまれ！ふしぎ研究部　１](https://member.bookwalker.jp/app/03/webstore/cooperation?r=BROWSER_VIEWER/640c0ddd-896c-4881-945f-ad5ce9a070a6/https%3A%2F%2Fbookwalker.jp%2FholdBooks%2F).
+The image default `CMD` is `python main.py`; for viewer flow run `python main_env.py` inside the container or override the command.
 
-        This is the URL of the **あつまれ！ふしぎ研究部　１**: <https://member.bookwalker.jp/app/03/webstore/cooperation?r=BROWSER_VIEWER/640c0ddd-896c-4881-945f-ad5ce9a070a6/https%3A%2F%2Fbookwalker.jp%2FholdBooks%2F>
+---
 
-    2.  For [Bookwalker.com.tw]
+## Cookies and connectivity checks
 
-        Please go to [线上阅读](https://www.bookwalker.com.tw/member/available_book_list).
+- **Bookwalker Taiwan** sets cookies with **`cookie_domain='.bookwalker.com.tw'`** so the session is visible on `www` and `pcreader` subdomains (see `downloader.add_cookies`).
+- **`check_bookwalker_cookie.py`**: checks cookies and URLs over **HTTP** (no Chrome). Can read from `.env` or `--from-main`. Exit codes: `0` no login gate detected, `1` login gate, `2` request error.
 
-        The manga URL like this：<https://www.bookwalker.com.tw/browserViewer/56994/read>
+---
 
-    3.  For [Cmoa.jp]
+## Downloads and debug artifacts
 
-        Open the Manga and just copy the URL on the browser.
+- On errors, `downloader` may write **`error.html`** and **`error.png`** in the current working directory and log details; refreshing cookies after re-login often fixes session issues.
 
-        The manga URL like this : <https://www.cmoa.jp/bib/speedreader/speed.html?cid=0000156072_jp_0001&u0=0&u1=0&rurl=https%3A%2F%2Fwww.cmoa.jp%2Fmypage%2Fmypage_top%2F%3Ftitle%3D156072>
+---
 
-    Just copy this URL to the `MANGA_URL` in _main.py_.
+## Tests
 
-4.  After edit the program, run `python main.py` to run it.
+```bash
+python -m pytest tests/ -v
+```
 
-# Notice
+Config loading and related logic have unit tests (no real browser or database).
 
-1.  The `SLEEP_TIME` by default is 2 seconds, you can adjust it with your own network situation, if the downloading has repeated images, you can change it to 5 or more. If you think it's too slow, try change it to 1 or even 0.5.
+---
 
-2.  `LOADING_WAIT_TIME = 20`, this is the time to wait until the manga viewer page loaded, if your network is not good, you can set it to 30 or 50 seconds.
+## Project layout (short)
 
-3.  Resolution, you can change it as you want, but check the original image resolution first.
+```
+main.py              # List mode settings
+main_env.py          # Entry point for .env + viewer mode
+config.py            # load_manga_config()
+manga_env.py         # String parsing, safe folder names
+downloader.py        # Downloader, Chrome, download loop
+website_actions/     # Per-site implementations
+tests/               # pytest
+```
 
-    ```python
-    RES = (784, 1200)
-    ```
+---
 
-    If the original image has a higher resolution, you can change it like this (The resolution is just a example).
+## Disclaimer
 
-    ```python
-    RES = (1568, 2400)
-    ```
+This tool only automates backup of **content you are authorized to access**. You must comply with each platform’s terms and copyright law. The authors and this repository are not responsible for misuse or infringement.
 
-    **For [Cmoa.jp] no need this, the resolution is fixed by [Cmoa.jp].**
+---
 
-4.  Some time we should log out and log in, this website is very strict and take so many method to prevent abuse.
+## Other languages
 
-5.  Now you can cut the image by setting `CUT_IMAGE` to (left, upper, right, lower).
+Traditional Chinese version: [README.zh-TW.md](README.zh-TW.md).
 
-    For example you want to cut 3px from the bottom of image, you can set it to:
-
-    ```python
-    CUT_IMAGE = (0, 0, 0, 3)
-    ```
-
-    This function use `Pillow`, if you want to use it, you should install it by using the command:
-
-    ```shell
-    pip install Pillow
-    ```
-
-    By default it is `None`, means do not cut the image.
-
-6.  You can now change the file name prefix and number of digits by changing `file_name_prefix` and `number_of_digits`.
-
-    For example, if you are downloading Kill La Kill Manga Volume 1, and you want the file name like:
-
-    <pre>
-        KLK_V1
-        │--KLK_V1_001.jpg
-        │--KLK_V1_002.jpg
-        │--KLK_V1_003.jpg
-    </pre>
-
-    Then you can set the parameters like below:
-
-    ```python
-    settings = {
-        ...,
-        'file_name_prefix': 'KLK_V1',
-        # File name digits count, if you want your file name like '001.jpg', write 3 here.
-        'number_of_digits': 3
-    }
-    ```
-
-# Develop
-
-0.  Concept
-
-    To download Manga, normally we do like this:
-
-    <pre>
-    +------------+     +-----------+      +------------+      +-------------------+      +--------------+
-    |            |     |           |      |            |      |                   | OVER |              |
-    |   Login    +-----+ Load page +----->+ Save image +----->+ Move to next page +----->+   Finished   |
-    |            |     |           |      |            |      |                   |      |              |
-    +------------+     +-----------+      +-----+------+      +---------+---------+      +--------------+
-                                                ^                       |
-                                                |                       |
-                                                |      More page        |
-                                                +-----------------------+
-    </pre>
-
-    So we can create a framework to reuse the code, for new website, normally we only need to write some of the method.
-
-1.  Structure of file
-
-    <pre>
-    |--main.py
-    │--downloader.py
-    │--README.MD
-    └─website_actions
-        │--abstract_website_actions.py
-        │--bookwalker_jp_actions.py
-        │--bookwalker_tw_actions.py
-        │--cmoa_jp_actions.py
-        │--__init__.py
-    </pre>
-
-2.  Introduction to abstract `WebsiteActions` class.
-
-    For each website, the class should have the following methods/attributes, here we use bookwalker.jp as example:
-
-    ```python
-    class BookwalkerJP(WebsiteActions):
-        '''
-        bookwalker.jp
-        '''
-
-        # login_url is the page that we load first and put the cookies.
-        login_url = 'https://member.bookwalker.jp/app/03/login'
-
-        @staticmethod
-        def check_url(manga_url):
-            '''
-            This method return a bool, check if the given manga url is belong to this class.
-            '''
-            return manga_url.find('bookwalker.jp') != -1
-
-        def get_sum_page_count(self, driver):
-            '''
-            This method return an integer, get total page number.
-            '''
-            return int(str(driver.find_element_by_id('pageSliderCounter').text).split('/')[1])
-
-        def move_to_page(self, driver, page):
-            '''
-            This method return nothing, move to given page number.
-            '''
-            driver.execute_script(
-                'NFBR.a6G.Initializer.B0U.menu.a6l.moveToPage(%d)' % page)
-
-        def wait_loading(self, driver):
-            '''
-            This method return nothing, wait manga loading.
-            '''
-            WebDriverWait(driver, 30).until_not(lambda x: self.check_is_loading(
-                x.find_elements_by_css_selector(".loading")))
-
-        def get_imgdata(self, driver, now_page):
-            '''
-            This method return String/something can be written to file or convert to BytesIO, get image data.
-            '''
-            canvas = driver.find_element_by_css_selector(".currentScreen canvas")
-            img_base64 = driver.execute_script(
-                "return arguments[0].toDataURL('image/jpeg').substring(22);", canvas)
-            return base64.b64decode(img_base64)
-
-        def get_now_page(self, driver):
-            '''
-            This method return an integer, the page number on the current page
-            '''
-            return int(str(driver.find_element_by_id('pageSliderCounter').text).split('/')[0])
-    ```
-
-      We also have a `before_download` method, this method run before we start download, because some website need to close some pop-up component before we start downloading.
-
-    ```python
-    def before_download(self, driver):
-        '''
-        This method return nothing, Run before download.
-        '''
-        driver.execute_script('parent.closeTips()')
-    ```
+Historical notes and the upstream author’s BW Chrome downloader releases remain on the [original repository](https://github.com/xuzhengyi1995/Manga_downloader).

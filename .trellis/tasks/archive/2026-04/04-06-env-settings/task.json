@@ -1,0 +1,56 @@
+{
+  "id": "env-settings",
+  "name": "env-settings",
+  "title": "Use .env for sensitive and primary settings",
+  "description": "Dual entry: main.py (settings dict) unchanged; main_env.py loads .env + merges non-env keys from main.settings. Viewer IDs, MANGA_VIEWER_URL_TEMPLATE, config/manga_env modules. See progress.md.",
+  "status": "completed",
+  "dev_type": "fullstack",
+  "scope": "Manga_downloader: .env viewer flow, main_env, Downloader viewer_ids",
+  "priority": "P2",
+  "creator": "daniel",
+  "assignee": "daniel",
+  "createdAt": "2026-04-06",
+  "completedAt": "2026-04-06",
+  "branch": null,
+  "base_branch": "feat/upgrade",
+  "worktree_path": null,
+  "current_phase": 2,
+  "next_action": [
+    {
+      "phase": 1,
+      "action": "implement"
+    },
+    {
+      "phase": 2,
+      "action": "check"
+    },
+    {
+      "phase": 3,
+      "action": "finish"
+    },
+    {
+      "phase": 4,
+      "action": "create-pr"
+    }
+  ],
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [
+    ".trellis/tasks/04-06-env-settings/progress.md",
+    "main.py",
+    "main_env.py",
+    "config.py",
+    "manga_env.py",
+    "downloader.py",
+    "check_bookwalker_cookie.py",
+    ".env.example",
+    "tests/test_manga_env.py",
+    "tests/test_config.py",
+    "tests/test_main_env.py"
+  ],
+  "notes": "2026-04-06: Core impl done. progress.md added. Manual E2E + full pytest pending. main.py kept as legacy inline settings; main_env imports main.settings for shared loading_wait_time etc.",
+  "meta": {}
+}

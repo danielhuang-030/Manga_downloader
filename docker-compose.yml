@@ -1,9 +1,13 @@
-version: "3.7"
+# Compose 預設會讀取專案根目錄 `.env` 做 YAML 變數替換；cookie 字串裡的 `$` 會觸發 WARN。
+# 建議執行時加上：--env-file compose.env
+# 例：docker compose --env-file compose.env run --rm python python -m pytest tests/ -v
 services:
   python:
     container_name: mangadw
     build:
       context: .
       dockerfile: Dockerfile
+    # Extra shared memory reduces Chrome "tab crashed" in headless (with --disable-dev-shm-usage in code).
+    shm_size: "2gb"
     volumes:
       - .:/app

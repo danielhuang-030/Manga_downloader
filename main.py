@@ -1,5 +1,5 @@
 '''
-Main file
+Main file — copy from README and fill cookies locally; do not commit real cookies.
 '''
 
 from downloader import Downloader
@@ -7,18 +7,16 @@ from downloader import Downloader
 settings = {
     # Manga urls, should be the same website
     'manga_url': [
-        'URL_1',
-        'URL_2'
+        'https://www.bookwalker.com.tw/browserViewer/000000/read',
     ],
-    # Your cookies
+    # Your cookies (export from browser after login; keep local-only)
     'cookies': 'YOUR_COOKIES_HERE',
     # Folder names to store the Manga, the same order with manga_url
     'imgdir': [
-        'IMGDIR_FOR_URL_1',
-        'IMGDIR_FOR_URL_2'
+        './downloads/example',
     ],
     # Resolution, (Width, Height), For coma this doesn't matter.
-    'res': (784, 1200),
+    'res': (1445, 2048),
     # Sleep time for each page (Second), normally no need to change.
     'sleep_time': 1,
     # Time wait for page loading (Second), if your network is good, you can reduce this parameter.

@@ -1,0 +1,47 @@
+{
+  "id": "readme-sync-fork",
+  "name": "readme-sync-fork",
+  "title": "README EN/zh-TW sync and upstream fork links",
+  "description": "README.md EN sync with README.zh-TW; fork attribution on both files.",
+  "status": "completed",
+  "dev_type": null,
+  "scope": null,
+  "priority": "P2",
+  "creator": "daniel",
+  "assignee": "daniel",
+  "createdAt": "2026-04-06",
+  "completedAt": "2026-04-06",
+  "branch": null,
+  "base_branch": "feat/upgrade",
+  "worktree_path": null,
+  "current_phase": 0,
+  "next_action": [
+    {
+      "phase": 1,
+      "action": "implement"
+    },
+    {
+      "phase": 2,
+      "action": "check"
+    },
+    {
+      "phase": 3,
+      "action": "finish"
+    },
+    {
+      "phase": 4,
+      "action": "create-pr"
+    }
+  ],
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [
+    "README.md",
+    "README.zh-TW.md"
+  ],
+  "notes": "",
+  "meta": {}
+}

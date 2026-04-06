@@ -5,6 +5,8 @@ import base64
 import logging
 import os
 import random
+import re
+import subprocess
 import time
 from io import BytesIO
 from PIL import ImageOps
@@ -17,8 +19,46 @@ from selenium.webdriver.support.ui import WebDriverWait
 from website_actions import *
 from website_actions.abstract_website_actions import WebsiteActions
 
+from manga_env import DEFAULT_VIEWER_URL_TEMPLATE, sanitize_download_folder_name
+
 logging.basicConfig(format='[%(levelname)s](%(name)s) %(asctime)s : %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
+
+
+def detect_chrome_major_version():
+    """
+    Chrome major version for undetected_chromedriver's version_main.
+
+    When omitted, uc may fetch a driver for the newest Chrome while apt's
+    google-chrome-stable is one major behind (e.g. driver 147 vs browser 146),
+    causing SessionNotCreatedException.
+    """
+    for binary in (
+        'google-chrome-stable',
+        'google-chrome',
+        'chromium',
+        'chromium-browser',
+    ):
+        try:
+            out = subprocess.check_output(
+                [binary, '--version'],
+                text=True,
+                stderr=subprocess.DEVNULL,
+                timeout=15,
+            )
+        except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            continue
+        m = re.search(r'(\d+)\.', out)
+        if m:
+            major = int(m.group(1))
+            logging.info('Detected Chrome major version %s (%s)', major, binary)
+            return major
+
+    logging.warning(
+        'Could not detect Chrome major version (no chrome/chromium in PATH). '
+        'If WebDriver fails with a version mismatch, set uc.Chrome(version_main=...).'
+    )
+    return None
 
 
 def get_cookie_dict(cookies):
@@ -34,9 +74,16 @@ def get_cookie_dict(cookies):
     return cookies_dict
 
 
-def add_cookies(driver, cookies):
+def add_cookies(driver, cookies, domain=None, path='/'):
+    """
+    Inject cookies on the current page. For Bookwalker TW, pass domain='.bookwalker.com.tw'
+    so session cookies are visible on pcreader.bookwalker.com.tw (not only www).
+    """
     for i in cookies:
-        driver.add_cookie({'name': i, 'value': cookies[i]})
+        payload = {'name': i, 'value': cookies[i], 'path': path}
+        if domain:
+            payload['domain'] = domain
+        driver.add_cookie(payload)
 
 
 class Downloader:
@@ -47,11 +94,24 @@ class Downloader:
     def __init__(
             self, manga_url, cookies, imgdir, res, sleep_time=2, loading_wait_time=20,
             cut_image=None, file_name_prefix='', number_of_digits=3, start_page=None,
-            end_page=None
+            end_page=None, viewer_ids=None, viewer_url_template=None,
     ):
-        self.manga_url = manga_url
+        self._viewer_ids = None
+        self._viewer_url_template = DEFAULT_VIEWER_URL_TEMPLATE
+        if viewer_ids is not None and len(viewer_ids) > 0:
+            cleaned = [str(x).strip() for x in viewer_ids if str(x).strip()]
+            if not cleaned:
+                raise ValueError("viewer_ids must contain at least one id")
+            self._viewer_ids = cleaned
+            self.manga_url = []
+            self.imgdir = []
+            if viewer_url_template:
+                self._viewer_url_template = viewer_url_template
+        else:
+            self.manga_url = manga_url
+            self.imgdir = imgdir
+
         self.cookies = get_cookie_dict(cookies)
-        self.imgdir = imgdir
         self.res = res
         self.sleep_time = sleep_time
         self.loading_wait_time = loading_wait_time
@@ -91,10 +151,32 @@ class Downloader:
         option.add_argument('--high-dpi-support=1')
         option.add_argument('--device-scale-factor=1')
         option.add_argument('--force-device-scale-factor=1')
-        option.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36')
+        chrome_major = detect_chrome_major_version()
+        # Align UA major with installed Chrome; mismatches (e.g. UA 122 vs browser 146) may break reader JS.
+        ua_major = chrome_major if chrome_major is not None else 122
+        option.add_argument(
+            '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+            '(KHTML, like Gecko) Chrome/%d.0.0.0 Safari/537.36' % ua_major
+        )
         option.add_argument("--app=%s" % self.str_to_data_uri('Manga_downloader'))
-        option.add_argument('--headless')
-        self.driver = uc.Chrome(options=option)
+        # Classic --headless is easy to fingerprint; Chrome 109+ supports --headless=new (closer to real).
+        headless_env = os.environ.get('MANGA_HEADLESS', 'new').strip().lower()
+        if headless_env in ('0', 'false', 'no', 'off'):
+            logging.info('Headless disabled (MANGA_HEADLESS=%s); requires a display (e.g. local, or xvfb).', headless_env)
+        elif headless_env == 'old':
+            option.add_argument('--headless')
+            logging.info('Using legacy --headless (MANGA_HEADLESS=old)')
+        else:
+            option.add_argument('--headless=new')
+            logging.info('Using --headless=new (set MANGA_HEADLESS=old or 0 to change)')
+        # Docker / Linux: default /dev/shm is tiny; Chrome tab crashes without these.
+        option.add_argument('--no-sandbox')
+        option.add_argument('--disable-dev-shm-usage')
+        option.add_argument('--disable-gpu')
+        if chrome_major is not None:
+            self.driver = uc.Chrome(options=option, version_main=chrome_major)
+        else:
+            self.driver = uc.Chrome(options=option)
         self.driver.set_window_size(self.res[0], self.res[1])
         viewport_dimensions = self.driver.execute_script("return [window.innerWidth, window.innerHeight];")
         logging.info('Viewport dimensions %s', viewport_dimensions)
@@ -130,7 +212,13 @@ class Downloader:
         driver = self.driver
         driver.get(self.actions_class.login_url)
         driver.delete_all_cookies()
-        add_cookies(driver, self.cookies)
+        cookie_domain = getattr(self.actions_class, 'cookie_domain', None)
+        if cookie_domain:
+            logging.info(
+                'Using cookie domain %s (reader may load on another subdomain).',
+                cookie_domain,
+            )
+        add_cookies(driver, self.cookies, domain=cookie_domain)
         logging.info('Login finished...')
 
     def prepare_download(self, this_image_dir, this_manga_url):
@@ -143,10 +231,11 @@ class Downloader:
         logging.info('Preparing for downloading...')
         time.sleep(self.loading_wait_time)
 
-    def download_book(self, this_image_dir):
+    def download_book(self, this_image_dir, skip_before_download=False):
         driver = self.driver
         logging.info('Run before downloading...')
-        self.actions_class.before_download(driver)
+        if not skip_before_download:
+            self.actions_class.before_download(driver)
         logging.info('Start download...')
         try:
             page_count = self.actions_class.get_sum_page_count(driver)
@@ -199,7 +288,44 @@ class Downloader:
             self.image_box = None
             return
 
+    def _download_one_viewer_id(self, book_index, viewer_id):
+        """Open viewer URL from template, resolve title folder, then download pages."""
+        url = self._viewer_url_template.format(id=viewer_id)
+        self.check_implementation(url)
+        if book_index == 0:
+            self.login()
+
+        driver = self.driver
+        logging.info("Starting viewer id %s", viewer_id)
+        driver.get(url)
+        logging.info('Book page Loaded...')
+        logging.info('Preparing for downloading...')
+        time.sleep(self.loading_wait_time)
+
+        self.actions_class.before_download(driver)
+
+        raw_title = driver.title
+        if not (raw_title or "").strip():
+            raw_title = driver.execute_script("return document.title") or ""
+
+        folder_name = sanitize_download_folder_name(raw_title, viewer_id)
+        this_image_dir = os.path.join("downloads", folder_name)
+        if not os.path.isdir(this_image_dir):
+            os.makedirs(this_image_dir)
+
+        logging.info("Resolved download dir: %s", this_image_dir)
+        self.download_book(this_image_dir, skip_before_download=True)
+
     def download(self):
+        if self._viewer_ids:
+            for i, vid in enumerate(self._viewer_ids):
+                self._download_one_viewer_id(i, vid)
+                logging.info("Finished download manga %d, viewer id: %s", i + 1, vid)
+                time.sleep(2)
+            self.driver.close()
+            self.driver.quit()
+            return
+
         total_manga = len(self.manga_url)
         total_dir = len(self.imgdir)
         if total_manga != total_dir:

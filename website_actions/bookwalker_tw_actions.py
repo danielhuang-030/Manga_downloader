@@ -8,8 +8,17 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 try:
     from abstract_website_actions import WebsiteActions
-except:
+except ImportError:
     from website_actions.abstract_website_actions import WebsiteActions
+
+try:
+    from bookwalker_nfbr_wait import ensure_nfbr_move_to_page_ready, nfbr_move_to_page, wait_for_nfbr_initializer
+except ImportError:
+    from website_actions.bookwalker_nfbr_wait import (
+        ensure_nfbr_move_to_page_ready,
+        nfbr_move_to_page,
+        wait_for_nfbr_initializer,
+    )
 
 
 class BookwalkerTW(WebsiteActions):
@@ -17,6 +26,8 @@ class BookwalkerTW(WebsiteActions):
     bookwalker.com.tw
     '''
     login_url = 'https://www.bookwalker.com.tw/user/login'
+    # Match browser Set-Cookie Domain=.bookwalker.com.tw so pcreader.bookwalker.com.tw sees session.
+    cookie_domain = '.bookwalker.com.tw'
     js = ''
 
     def check_is_loading(self, list_ele):
@@ -38,8 +49,7 @@ class BookwalkerTW(WebsiteActions):
         return int(str(driver.find_element(By.ID, 'pageSliderCounter').get_attribute('textContent')).split('/')[1])
 
     def move_to_page(self, driver, page):
-        driver.execute_script(
-            f'NFBR.a6G.Initializer.{self.js}.menu.options.a6l.moveToPage(%d)' % page)
+        nfbr_move_to_page(driver, page)
 
     def wait_loading(self, driver):
         WebDriverWait(driver, 600).until_not(lambda x: self.check_is_loading(
@@ -55,8 +65,7 @@ class BookwalkerTW(WebsiteActions):
         return int(str(driver.find_element(By.ID, 'pageSliderCounter').get_attribute('textContent')).split('/')[0])
     
     def before_download(self, driver):
-        for key in driver.execute_script('return Object.keys(NFBR.a6G.Initializer)'):
-            if 'menu' in driver.execute_script(f'return Object.keys(NFBR.a6G.Initializer.{key})'):
-                self.js = key
-                break
+        # Reader bundles NFBR asynchronously; fixed sleep in prepare_download is not always enough.
+        wait_for_nfbr_initializer(driver, timeout_sec=180)
+        ensure_nfbr_move_to_page_ready(driver)
 

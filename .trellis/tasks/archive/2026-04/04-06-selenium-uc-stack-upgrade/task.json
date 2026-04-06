@@ -1,0 +1,83 @@
+{
+  "id": "selenium-uc-stack-upgrade",
+  "name": "selenium-uc-stack-upgrade",
+  "title": "Selenium + uc stack upgrade",
+  "description": "Implement phased upgrades while keeping undetected-chromedriver + Selenium architecture.",
+  "status": "completed",
+  "dev_type": "backend",
+  "scope": "Selenium + uc phased upgrade (Python, deps, Docker)",
+  "priority": "P1",
+  "creator": "daniel",
+  "assignee": "daniel",
+  "createdAt": "2026-04-06",
+  "completedAt": "2026-04-06",
+  "branch": "feat/upgrade",
+  "base_branch": "feat/upgrade",
+  "worktree_path": null,
+  "current_phase": 4,
+  "next_action": [],
+  "commit": "df6fe75",
+  "pr_url": null,
+  "subtasks": [
+    {
+      "name": "Tech assessment + task merge + archive old assess task",
+      "status": "completed"
+    },
+    {
+      "name": "Brainstorming: design.md + upgrade-details.md approved",
+      "status": "completed"
+    },
+    {
+      "name": "Pytest TDD scaffold (tests/test_downloader_helpers.py, requirements-dev.txt)",
+      "status": "completed"
+    },
+    {
+      "name": "Phase 0: baseline tag + Chrome/driver notes",
+      "status": "completed"
+    },
+    {
+      "name": "Phase 1: security pins + pytest green + smoke download",
+      "status": "completed"
+    },
+    {
+      "name": "Phase 2: Dockerfile (apt + remove legacy chromedriver zip)",
+      "status": "completed"
+    },
+    {
+      "name": "Phase 3: Python 3.12 base image + deps",
+      "status": "completed"
+    },
+    {
+      "name": "Phase 4: Selenium/uc bump + TW Docker E2E",
+      "status": "completed"
+    }
+  ],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [
+    ".trellis/tasks/04-06-selenium-uc-stack-upgrade/assessment.md",
+    ".trellis/tasks/04-06-selenium-uc-stack-upgrade/design.md",
+    ".trellis/tasks/04-06-selenium-uc-stack-upgrade/upgrade-details.md",
+    ".trellis/tasks/04-06-selenium-uc-stack-upgrade/baseline-phase0.md",
+    ".trellis/tasks/04-06-selenium-uc-stack-upgrade/prd.md",
+    "requirements.txt",
+    "Dockerfile",
+    "docker-compose.yml",
+    "downloader.py",
+    "check_bookwalker_cookie.py",
+    "website_actions/bookwalker_nfbr_wait.py",
+    "website_actions/bookwalker_tw_actions.py",
+    "website_actions/bookwalker_jp_actions.py",
+    "tests/test_downloader_helpers.py",
+    "tests/test_bookwalker_nfbr_wait.py",
+    "tests/test_check_bookwalker_cookie.py",
+    "requirements-dev.txt",
+    "pytest.ini"
+  ],
+  "notes": "2026-04-06 DONE: Stack on 5105992 + 50cb617 (Selenium 4.41, uc 3.5.5). Root fix for false login: add_cookie with cookie_domain .bookwalker.com.tw so pcreader subdomain receives session (HTTP check_bookwalker_cookie OK but Selenium failed until domain set). NFBR wait + BookwalkerSessionError + debug artifacts. pytest 25+. TW Docker headless download verified; JP second-site E2E not run this round. Archived under .trellis/tasks/archive/2026-04/.",
+  "meta": {
+    "last_updated": "2026-04-06",
+    "branch": "feat/upgrade",
+    "archived_month": "2026-04"
+  }
+}
