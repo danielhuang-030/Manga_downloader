@@ -20,6 +20,7 @@ from website_actions import *
 from website_actions.abstract_website_actions import WebsiteActions
 
 from manga_env import DEFAULT_VIEWER_URL_TEMPLATE, sanitize_download_folder_name
+from progress_support import emit_progress
 
 logging.basicConfig(format='[%(levelname)s](%(name)s) %(asctime)s : %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
@@ -95,6 +96,7 @@ class Downloader:
             self, manga_url, cookies, imgdir, res, sleep_time=2, loading_wait_time=20,
             cut_image=None, file_name_prefix='', number_of_digits=3, start_page=None,
             end_page=None, viewer_ids=None, viewer_url_template=None,
+            progress_reporter=None,
     ):
         self._viewer_ids = None
         self._viewer_url_template = DEFAULT_VIEWER_URL_TEMPLATE
@@ -124,6 +126,7 @@ class Downloader:
         self.start_page = start_page - 1 if start_page and start_page > 0 else 0
         self.end_page = end_page
         self.image_box = None
+        self._progress_reporter = progress_reporter
 
         self.init_function()
 
@@ -231,7 +234,7 @@ class Downloader:
         logging.info('Preparing for downloading...')
         time.sleep(self.loading_wait_time)
 
-    def download_book(self, this_image_dir, skip_before_download=False):
+    def download_book(self, this_image_dir, skip_before_download=False, progress_book_id=None):
         driver = self.driver
         logging.info('Run before downloading...')
         if not skip_before_download:
@@ -268,6 +271,15 @@ class Downloader:
                             (self.left, self.upper, width - self.right, height - self.lower)).save(img_file, format='PNG')
 
                 logging.info('Page %d Downloaded', i + 1)
+                emit_progress(
+                    self._progress_reporter,
+                    {
+                        "type": "page_progress",
+                        "viewer_id": progress_book_id if progress_book_id is not None else "",
+                        "page": i + 1,
+                        "total_pages": page_count,
+                    },
+                )
                 if i == page_count - 1:
                     logging.info('Finished.')
                     self.image_box = None
@@ -280,6 +292,10 @@ class Downloader:
 
                 time.sleep(self.sleep_time + random.random() * 2)
         except Exception as err:
+            emit_progress(
+                self._progress_reporter,
+                {"type": "run_error", "message": str(err)[:500]},
+            )
             with open("error.html", "w", encoding="utf-8") as err_source:
                 err_source.write(driver.page_source)
             driver.save_screenshot('./error.png')
@@ -314,14 +330,29 @@ class Downloader:
             os.makedirs(this_image_dir)
 
         logging.info("Resolved download dir: %s", this_image_dir)
-        self.download_book(this_image_dir, skip_before_download=True)
+        emit_progress(
+            self._progress_reporter,
+            {
+                "type": "book_started",
+                "viewer_id": str(viewer_id),
+                "index": book_index,
+                "title": (raw_title or "").strip() or None,
+            },
+        )
+        self.download_book(
+            this_image_dir,
+            skip_before_download=True,
+            progress_book_id=str(viewer_id),
+        )
 
     def download(self):
+        emit_progress(self._progress_reporter, {"type": "run_started"})
         if self._viewer_ids:
             for i, vid in enumerate(self._viewer_ids):
                 self._download_one_viewer_id(i, vid)
                 logging.info("Finished download manga %d, viewer id: %s", i + 1, vid)
                 time.sleep(2)
+            emit_progress(self._progress_reporter, {"type": "run_finished", "ok": True})
             self.driver.close()
             self.driver.quit()
             return
@@ -330,6 +361,13 @@ class Downloader:
         total_dir = len(self.imgdir)
         if total_manga != total_dir:
             logging.error('Total manga urls given not equal to imgdir.')
+            emit_progress(
+                self._progress_reporter,
+                {
+                    "type": "run_error",
+                    "message": "Total manga urls given not equal to imgdir.",
+                },
+            )
             return
 
         for i in range(total_manga):
@@ -340,10 +378,20 @@ class Downloader:
                 self.login()
             logging.info("Starting download manga %d, imgdir: %s",
                          i + 1, t_img_dir)
+            emit_progress(
+                self._progress_reporter,
+                {
+                    "type": "book_started",
+                    "viewer_id": "",
+                    "index": i,
+                    "title": t_img_dir,
+                },
+            )
             self.prepare_download(t_img_dir, t_manga_url)
-            self.download_book(t_img_dir)
+            self.download_book(t_img_dir, progress_book_id=t_img_dir)
             logging.info("Finished download manga %d, imgdir: %s",
                          i + 1, t_img_dir)
             time.sleep(2)
+        emit_progress(self._progress_reporter, {"type": "run_finished", "ok": True})
         self.driver.close()
         self.driver.quit()

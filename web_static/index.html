@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Manga_downloader</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <main>
+    <h1>Manga_downloader</h1>
+    <p class="hint">本機設定（<code>.env</code>）。Cookie 欄位載入後為遮罩；若不變更請勿覆寫為其他字串。</p>
+
+    <section class="panel">
+      <h2>環境變數</h2>
+      <form id="env-form">
+        <label>MANGA_COOKIES <textarea name="MANGA_COOKIES" rows="3" placeholder="***masked***"></textarea></label>
+        <label>BOOKWALKER_COOKIE <textarea name="BOOKWALKER_COOKIE" rows="2" placeholder="選填"></textarea></label>
+        <label>MANGA_RES <input name="MANGA_RES" /></label>
+        <label>MANGA_SLEEP_TIME <input name="MANGA_SLEEP_TIME" type="text" /></label>
+        <label>MANGA_IDS <input name="MANGA_IDS" /></label>
+        <label>MANGA_VIEWER_URL_TEMPLATE <input name="MANGA_VIEWER_URL_TEMPLATE" placeholder="選填，須含 {id}" /></label>
+        <label>MANGA_HEADLESS <input name="MANGA_HEADLESS" placeholder="選填：new / old / 0" /></label>
+        <button type="submit">儲存</button>
+      </form>
+      <p id="env-msg" class="msg" aria-live="polite"></p>
+    </section>
+
+    <section class="panel">
+      <h2>下載</h2>
+      <button type="button" id="btn-start">開始下載</button>
+      <p id="start-msg" class="msg" aria-live="polite"></p>
+    </section>
+
+    <section class="panel">
+      <h2>進度</h2>
+      <pre id="log" class="log"></pre>
+    </section>
+  </main>
+  <script src="/app.js" defer></script>
+</body>
+</html>
