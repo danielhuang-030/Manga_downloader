@@ -107,3 +107,36 @@ Delivered .env-driven flow: config.py, manga_env.py, main_env.py, Downloader vie
 ### Next Steps
 
 - None - task complete
+
+
+## Session 4: README 正體中文與任務收尾
+
+**Date**: 2026-04-06
+**Task**: README 正體中文與任務收尾
+
+### Summary
+
+新增依目前程式撰寫之 README.zh-TW.md、README.md 語言連結；建立並封存 Trellis 任務 readme-zh-tw。
+
+### Main Changes
+
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `58d1914` | (see git log) |
+| `63abbd1` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
