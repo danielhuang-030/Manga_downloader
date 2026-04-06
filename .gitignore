@@ -124,6 +124,9 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
+# Local main backup (often contains secrets)
+main copy.py
+
 # --- Manga_downloader: download output & sensitive debug (PII / large files) ---
 downloads/
 error.html
