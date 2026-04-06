@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 1
+- **Total Sessions**: 2
 - **Last Active**: 2026-04-06
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~37 | Active |
+| `journal-1.md` | ~74 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits |
 |---|------|-------|---------|
+| 2 | 2026-04-06 | Selenium+uc stack upgrade: close & archive | `6acca54`, `df6fe75`, `e6f3a82` |
 | 1 | 2026-04-06 | Trellis bootstrap: frontend N/A specs + archive | `bb34151`, `44be9d4` |
 <!-- @@@/auto:session-history -->
 
