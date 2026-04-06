@@ -2,17 +2,20 @@
 """
 Check Bookwalker TW cookie string against a URL using HTTP only (no Chrome).
 
-Use the same Cookie format as main.py: name=value; name2=value2
+Cookie 格式與 Downloader 相同：name=value; name2=value2
+
+預設會載入目前目錄的 .env（python-dotenv）。優先使用 MANGA_COOKIES，否則 BOOKWALKER_COOKIE。
 
 Examples:
-  # Use cookies + first manga_url from main.py (same source as Downloader)
+  # 使用 .env 內的 cookie（與 main_env.py 相同來源），並以 MANGA_IDS 第一個 ID 組 viewer URL（未傳 --url 時）
+  python check_bookwalker_cookie.py
+
+  # 仍支援自舊版 main.py 讀取（--from-main）
   python check_bookwalker_cookie.py --from-main
 
-  python check_bookwalker_cookie.py --from-main --main-path ./main.py --manga-index 0
+  python check_bookwalker_cookie.py --from-main --main-path ./legacy_main.py --manga-index 0
 
   python check_bookwalker_cookie.py --url 'https://...' --cookie 'a=b; c=d'
-
-  BOOKWALKER_COOKIE='a=b; c=d' python check_bookwalker_cookie.py --url '...'
 
 Exit codes: 0 = no login gate detected (cookie may be valid); 1 = login gate; 2 = request error.
 """
@@ -23,6 +26,7 @@ import sys
 
 import requests
 
+from manga_env import parse_manga_ids, parse_viewer_url_template, resolve_cookie_header
 from website_actions.bookwalker_nfbr_wait import bookwalker_tw_login_gate_in_markup
 
 
@@ -43,13 +47,14 @@ def _load_cookie(args):
             return f.read().strip()
     if args.cookie is not None:
         return args.cookie.strip()
-    env = os.environ.get('BOOKWALKER_COOKIE', '').strip()
-    if env:
-        return env
-    return ''
+    return resolve_cookie_header(os.environ)
 
 
 def main():
+    from dotenv import load_dotenv
+
+    load_dotenv()
+
     parser = argparse.ArgumentParser(
         description='Verify Bookwalker TW cookies with a GET request (no browser).',
     )
@@ -75,7 +80,7 @@ def main():
         '--url',
         default=None,
         metavar='URL',
-        help='Target URL. With --from-main, optional (overrides manga_url[N]). Otherwise required.',
+        help='Target URL. Optional if MANGA_IDS is set (uses first id as browserViewer URL). With --from-main, optional (overrides manga_url[N]).',
     )
     parser.add_argument(
         '--cookie',
@@ -121,11 +126,19 @@ def main():
     else:
         cookie = _load_cookie(args)
         if not url:
-            parser.error('--url is required unless --from-main is used.')
+            ids = parse_manga_ids(os.environ.get('MANGA_IDS', ''))
+            if ids:
+                tpl = parse_viewer_url_template(os.environ.get('MANGA_VIEWER_URL_TEMPLATE'))
+                url = tpl.format(id=ids[0])
+        if not url:
+            parser.error(
+                '--url is required unless --from-main is used or MANGA_IDS provides a default.',
+            )
 
     if not cookie:
         parser.error(
-            'No cookie: use --from-main, or pass --cookie / --cookie-file / BOOKWALKER_COOKIE.'
+            'No cookie: use --from-main, or .env MANGA_COOKIES / BOOKWALKER_COOKIE, '
+            'or pass --cookie / --cookie-file.',
         )
 
     headers = {

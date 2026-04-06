@@ -134,6 +134,14 @@ class TestDownloaderInitPageIndices:
         assert "/vol1_" in d.file_name_model
         assert d.file_name_model.endswith("%04d.png")
 
+    def test_viewer_ids_empty_tokens_raises(self, make_downloader):
+        with pytest.raises(ValueError, match="viewer_ids"):
+            make_downloader(
+                manga_url=[],
+                imgdir=[],
+                viewer_ids=["", "  "],
+            )
+
 
 class TestDetectChromeMajorVersion:
     """detect_chrome_major_version — match uc driver to installed Chrome."""

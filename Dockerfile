@@ -27,7 +27,8 @@ WORKDIR /app
 
 RUN pip install --upgrade pip
 
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt \
+    && pip install -r requirements-dev.txt
 
 # Record runtime versions for upgrade notes (driver comes from uc at runtime).
 RUN python --version && google-chrome-stable --version

@@ -33,7 +33,7 @@ settings = {
     # Start page, if you want to download from 3 page, set this to 3, None means from 0
     'start_page': None,
     # End page, if you want to download until 10 page, set this to 10, None means until finished
-    'end_page': 5,
+    'end_page': None,
 }
 
 if __name__ == '__main__':

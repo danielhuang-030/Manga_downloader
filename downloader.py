@@ -19,6 +19,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from website_actions import *
 from website_actions.abstract_website_actions import WebsiteActions
 
+from manga_env import DEFAULT_VIEWER_URL_TEMPLATE, sanitize_download_folder_name
+
 logging.basicConfig(format='[%(levelname)s](%(name)s) %(asctime)s : %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
 
@@ -92,11 +94,24 @@ class Downloader:
     def __init__(
             self, manga_url, cookies, imgdir, res, sleep_time=2, loading_wait_time=20,
             cut_image=None, file_name_prefix='', number_of_digits=3, start_page=None,
-            end_page=None
+            end_page=None, viewer_ids=None, viewer_url_template=None,
     ):
-        self.manga_url = manga_url
+        self._viewer_ids = None
+        self._viewer_url_template = DEFAULT_VIEWER_URL_TEMPLATE
+        if viewer_ids is not None and len(viewer_ids) > 0:
+            cleaned = [str(x).strip() for x in viewer_ids if str(x).strip()]
+            if not cleaned:
+                raise ValueError("viewer_ids must contain at least one id")
+            self._viewer_ids = cleaned
+            self.manga_url = []
+            self.imgdir = []
+            if viewer_url_template:
+                self._viewer_url_template = viewer_url_template
+        else:
+            self.manga_url = manga_url
+            self.imgdir = imgdir
+
         self.cookies = get_cookie_dict(cookies)
-        self.imgdir = imgdir
         self.res = res
         self.sleep_time = sleep_time
         self.loading_wait_time = loading_wait_time
@@ -216,10 +231,11 @@ class Downloader:
         logging.info('Preparing for downloading...')
         time.sleep(self.loading_wait_time)
 
-    def download_book(self, this_image_dir):
+    def download_book(self, this_image_dir, skip_before_download=False):
         driver = self.driver
         logging.info('Run before downloading...')
-        self.actions_class.before_download(driver)
+        if not skip_before_download:
+            self.actions_class.before_download(driver)
         logging.info('Start download...')
         try:
             page_count = self.actions_class.get_sum_page_count(driver)
@@ -272,7 +288,44 @@ class Downloader:
             self.image_box = None
             return
 
+    def _download_one_viewer_id(self, book_index, viewer_id):
+        """Open viewer URL from template, resolve title folder, then download pages."""
+        url = self._viewer_url_template.format(id=viewer_id)
+        self.check_implementation(url)
+        if book_index == 0:
+            self.login()
+
+        driver = self.driver
+        logging.info("Starting viewer id %s", viewer_id)
+        driver.get(url)
+        logging.info('Book page Loaded...')
+        logging.info('Preparing for downloading...')
+        time.sleep(self.loading_wait_time)
+
+        self.actions_class.before_download(driver)
+
+        raw_title = driver.title
+        if not (raw_title or "").strip():
+            raw_title = driver.execute_script("return document.title") or ""
+
+        folder_name = sanitize_download_folder_name(raw_title, viewer_id)
+        this_image_dir = os.path.join("downloads", folder_name)
+        if not os.path.isdir(this_image_dir):
+            os.makedirs(this_image_dir)
+
+        logging.info("Resolved download dir: %s", this_image_dir)
+        self.download_book(this_image_dir, skip_before_download=True)
+
     def download(self):
+        if self._viewer_ids:
+            for i, vid in enumerate(self._viewer_ids):
+                self._download_one_viewer_id(i, vid)
+                logging.info("Finished download manga %d, viewer id: %s", i + 1, vid)
+                time.sleep(2)
+            self.driver.close()
+            self.driver.quit()
+            return
+
         total_manga = len(self.manga_url)
         total_dir = len(self.imgdir)
         if total_manga != total_dir:
