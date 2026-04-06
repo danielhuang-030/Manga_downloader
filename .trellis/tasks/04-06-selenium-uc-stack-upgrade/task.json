@@ -33,7 +33,7 @@
       "action": "create-pr"
     }
   ],
-  "commit": "ba82570",
+  "commit": "50cb617",
   "pr_url": null,
   "subtasks": [
     {
@@ -84,7 +84,7 @@
     "requirements-dev.txt",
     "pytest.ini"
   ],
-  "notes": "2026-04-06: Phase 4 — Selenium 4.41.0 + uc 3.5.5 (PyPI), websocket-client stack; pytest green in Docker. Remaining: ≥2 website_actions E2E + optional smoke for phases 1–2.",
+  "notes": "2026-04-06: Phase 4 deps committed 50cb617 (Selenium 4.41.0, uc 3.5.5, transitive pins). Remaining: ≥2 website_actions E2E + optional smoke for phases 1–2.",
   "meta": {
     "last_updated": "2026-04-06",
     "branch": "feat/upgrade"

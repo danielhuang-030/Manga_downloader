@@ -20,7 +20,7 @@
 | 本機執行 `pytest` 全綠 | 待開發者於具 pip 環境執行（或沿用容器驗證） |
 | **階段 4** — Selenium／uc 與傳遞依賴 | **Selenium 4.41.0**；**undetected-chromedriver 3.5.5**（PyPI 最新）；新增 **websocket-client**；映像內 `pip check` + `pytest` **12 passed**；**≥2 站台 E2E** 仍待你方跑通 |
 
-**近期 commit：** `0c327f4`（pytest）、`472412d`（Trellis 任務與 upgrade-details）；進度寫入見 `feat/upgrade` 上 `docs(trellis): record selenium+uc upgrade task progress` 等（`git log --oneline .trellis/tasks/04-06-selenium-uc-stack-upgrade/`）。
+**近期 commit：** 階段 4 依賴與任務筆記 **`50cb617`**（`feat(deps): bump Selenium to 4.41.0…`）；更早見 `git log --oneline .trellis/tasks/04-06-selenium-uc-stack-upgrade/` 與 `feat/upgrade` 分支。
 
 ## Goal
 
