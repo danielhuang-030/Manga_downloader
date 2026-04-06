@@ -33,7 +33,7 @@
       "action": "create-pr"
     }
   ],
-  "commit": "0c327f4",
+  "commit": "dafd1d4",
   "pr_url": null,
   "subtasks": [
     {
@@ -83,7 +83,7 @@
     "requirements-dev.txt",
     "pytest.ini"
   ],
-  "notes": "2026-04-06: Planning + docs + pytest scaffold on feat/upgrade. Commits: 0c327f4 (pytest TDD), 472412d (trellis task docs + upgrade-details). Next: run pytest locally, phase 0 tag, phase 1 pins per upgrade-details.md.",
+  "notes": "2026-04-06: Planning + docs + pytest on feat/upgrade. Code: 0c327f4 (pytest). Task docs: dafd1d4 (progress), 472412d (upgrade-details bundle). Next: pytest locally, phase 0 tag, phase 1 pins.",
   "meta": {
     "last_updated": "2026-04-06",
     "branch": "feat/upgrade"
