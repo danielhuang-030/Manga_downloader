@@ -16,7 +16,7 @@
 | 本機執行 `pytest` 全綠 | 待開發者於具 pip 環境執行 |
 | [upgrade-details.md](./upgrade-details.md) 階段 0–4 實際升級 | 未開始 |
 
-**近期 commit：** `0c327f4`（測試）、`472412d`（Trellis 任務目錄與 upgrade-details）。
+**近期 commit：** `0c327f4`（pytest）、`472412d`（Trellis 任務與 upgrade-details）、`dafd1d4`／`58d69c8`（任務進度寫入 `task.json`／`prd.md` 等）。
 
 ## Goal
 
