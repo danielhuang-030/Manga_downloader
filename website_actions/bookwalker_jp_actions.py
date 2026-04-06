@@ -8,8 +8,13 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 try:
     from abstract_website_actions import WebsiteActions
-except:
+except ImportError:
     from website_actions.abstract_website_actions import WebsiteActions
+
+try:
+    from bookwalker_nfbr_wait import wait_for_nfbr_initializer
+except ImportError:
+    from website_actions.bookwalker_nfbr_wait import wait_for_nfbr_initializer
 
 
 class BookwalkerJP(WebsiteActions):
@@ -17,6 +22,7 @@ class BookwalkerJP(WebsiteActions):
     bookwalker.jp
     '''
     login_url = 'https://member.bookwalker.jp/app/03/login'
+    cookie_domain = '.bookwalker.jp'
     js = ''
 
     def check_is_loading(self, list_ele):
@@ -55,7 +61,15 @@ class BookwalkerJP(WebsiteActions):
         return int(str(driver.find_element(By.ID, 'pageSliderCounter').get_attribute('textContent')).split('/')[0])
     
     def before_download(self, driver):
+        wait_for_nfbr_initializer(driver, timeout_sec=180)
+        self.js = ''
         for key in driver.execute_script('return Object.keys(NFBR.a6G.Initializer)'):
-            if 'menu' in driver.execute_script(f'return Object.keys(NFBR.a6G.Initializer.{key})'):
+            if 'menu' in driver.execute_script(
+                f'return Object.keys(NFBR.a6G.Initializer.{key})'
+            ):
                 self.js = key
                 break
+        if self.js == '':
+            raise RuntimeError(
+                'Bookwalker JP: no NFBR.a6G.Initializer.* key with menu (site JS may have changed).'
+            )

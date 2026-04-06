@@ -5,6 +5,8 @@ import base64
 import logging
 import os
 import random
+import re
+import subprocess
 import time
 from io import BytesIO
 from PIL import ImageOps
@@ -21,6 +23,42 @@ logging.basicConfig(format='[%(levelname)s](%(name)s) %(asctime)s : %(message)s'
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
 
 
+def detect_chrome_major_version():
+    """
+    Chrome major version for undetected_chromedriver's version_main.
+
+    When omitted, uc may fetch a driver for the newest Chrome while apt's
+    google-chrome-stable is one major behind (e.g. driver 147 vs browser 146),
+    causing SessionNotCreatedException.
+    """
+    for binary in (
+        'google-chrome-stable',
+        'google-chrome',
+        'chromium',
+        'chromium-browser',
+    ):
+        try:
+            out = subprocess.check_output(
+                [binary, '--version'],
+                text=True,
+                stderr=subprocess.DEVNULL,
+                timeout=15,
+            )
+        except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            continue
+        m = re.search(r'(\d+)\.', out)
+        if m:
+            major = int(m.group(1))
+            logging.info('Detected Chrome major version %s (%s)', major, binary)
+            return major
+
+    logging.warning(
+        'Could not detect Chrome major version (no chrome/chromium in PATH). '
+        'If WebDriver fails with a version mismatch, set uc.Chrome(version_main=...).'
+    )
+    return None
+
+
 def get_cookie_dict(cookies):
     cookies_split = cookies.split('; ')
     if len(cookies_split) == 1:
@@ -34,9 +72,16 @@ def get_cookie_dict(cookies):
     return cookies_dict
 
 
-def add_cookies(driver, cookies):
+def add_cookies(driver, cookies, domain=None, path='/'):
+    """
+    Inject cookies on the current page. For Bookwalker TW, pass domain='.bookwalker.com.tw'
+    so session cookies are visible on pcreader.bookwalker.com.tw (not only www).
+    """
     for i in cookies:
-        driver.add_cookie({'name': i, 'value': cookies[i]})
+        payload = {'name': i, 'value': cookies[i], 'path': path}
+        if domain:
+            payload['domain'] = domain
+        driver.add_cookie(payload)
 
 
 class Downloader:
@@ -91,10 +136,32 @@ class Downloader:
         option.add_argument('--high-dpi-support=1')
         option.add_argument('--device-scale-factor=1')
         option.add_argument('--force-device-scale-factor=1')
-        option.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36')
+        chrome_major = detect_chrome_major_version()
+        # Align UA major with installed Chrome; mismatches (e.g. UA 122 vs browser 146) may break reader JS.
+        ua_major = chrome_major if chrome_major is not None else 122
+        option.add_argument(
+            '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+            '(KHTML, like Gecko) Chrome/%d.0.0.0 Safari/537.36' % ua_major
+        )
         option.add_argument("--app=%s" % self.str_to_data_uri('Manga_downloader'))
-        option.add_argument('--headless')
-        self.driver = uc.Chrome(options=option)
+        # Classic --headless is easy to fingerprint; Chrome 109+ supports --headless=new (closer to real).
+        headless_env = os.environ.get('MANGA_HEADLESS', 'new').strip().lower()
+        if headless_env in ('0', 'false', 'no', 'off'):
+            logging.info('Headless disabled (MANGA_HEADLESS=%s); requires a display (e.g. local, or xvfb).', headless_env)
+        elif headless_env == 'old':
+            option.add_argument('--headless')
+            logging.info('Using legacy --headless (MANGA_HEADLESS=old)')
+        else:
+            option.add_argument('--headless=new')
+            logging.info('Using --headless=new (set MANGA_HEADLESS=old or 0 to change)')
+        # Docker / Linux: default /dev/shm is tiny; Chrome tab crashes without these.
+        option.add_argument('--no-sandbox')
+        option.add_argument('--disable-dev-shm-usage')
+        option.add_argument('--disable-gpu')
+        if chrome_major is not None:
+            self.driver = uc.Chrome(options=option, version_main=chrome_major)
+        else:
+            self.driver = uc.Chrome(options=option)
         self.driver.set_window_size(self.res[0], self.res[1])
         viewport_dimensions = self.driver.execute_script("return [window.innerWidth, window.innerHeight];")
         logging.info('Viewport dimensions %s', viewport_dimensions)
@@ -130,7 +197,13 @@ class Downloader:
         driver = self.driver
         driver.get(self.actions_class.login_url)
         driver.delete_all_cookies()
-        add_cookies(driver, self.cookies)
+        cookie_domain = getattr(self.actions_class, 'cookie_domain', None)
+        if cookie_domain:
+            logging.info(
+                'Using cookie domain %s (reader may load on another subdomain).',
+                cookie_domain,
+            )
+        add_cookies(driver, self.cookies, domain=cookie_domain)
         logging.info('Login finished...')
 
     def prepare_download(self, this_image_dir, this_manga_url):

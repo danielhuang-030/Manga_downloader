@@ -98,9 +98,11 @@
 | 2026-04-06 | 階段 2：`Dockerfile` — `signed-by` keyring 安裝 `google-chrome-stable`；移除 `chromedriver.storage.googleapis.com` zip 與 `unzip`；移除 `ENV DISPLAY=:99`；建置步驟執行 `google-chrome-stable --version`。Driver 交由 uc 於執行期解析。容器 E2E 待驗證 |
 | 2026-04-06 | 階段 3：`FROM python:3.12-bookworm`；`requirements.txt` 新增 **setuptools==75.8.0**（Python 3.12 移除 stdlib `distutils`，`undetected-chromedriver` 3.5.5 仍 `import distutils.version`）。映像內 `pip check` + `pytest` 全綠。容器／多站台 E2E 仍待驗證 |
 | 2026-04-06 | 階段 4：**Selenium 4.41.0**（連帶 trio／urllib3／websocket-client／websockets 等）；**uc 維持 3.5.5**（PyPI 無更新版）。多站台 E2E 待驗證 |
+| 2026-04-06 | **執行期除錯（堆疊外、為 Docker／Bookwalker）**：`downloader.py` — **`detect_chrome_major_version()`**、`uc.Chrome(..., version_main=…)`（避免 SessionNotCreatedException：driver 新於映像內 Chrome）；Docker 加 **`--no-sandbox` / `--disable-dev-shm-usage` / `--disable-gpu`**；預設 **`--headless=new`**，環境變數 **`MANGA_HEADLESS`**（`new`／`old`／`0`）；User-Agent 內 Chrome 主版與偵測一致。**`docker-compose.yml`**：`shm_size: 2gb`、移除頂層 `version`。**Bookwalker**：新增 **`website_actions/bookwalker_nfbr_wait.py`** — 等 **`NFBR.a6G.Initializer`**、遞迴進 iframe、輔助 **`#pageSliderCounter`**；逾時寫 **`debug_bookwalker_nfbr_timeout.html`** / **`.png`**（根目錄，勿提交個資）。**`bookwalker_tw_actions`／`bookwalker_jp_actions`**：`before_download` 呼叫上述等待。映像內 **`pytest` 約 14 passed**。**Spike 結果**：`docker compose run` + Bookwalker TW **登入成功**，但 **headless 下 NFBR 180s 內未就緒** — **階段 1 smoke 與階段 4 ≥2 站台 E2E 仍不可勾 acceptance**；後續見 [prd.md §目前進度](./prd.md) |
+| 2026-04-06 | **結案**：誤判根因為 **`add_cookie` 未設 `domain`**，session 僅綁 **`www.bookwalker.com.tw`**，導向 **`pcreader.bookwalker.com.tw`** 時無登入 → SweetAlert「請登入會員」。**修正**：`add_cookies(..., domain=...)`；**`BookwalkerTW.cookie_domain = '.bookwalker.com.tw'`**（**`BookwalkerJP`**：`.bookwalker.jp`）。**`check_bookwalker_cookie.py`**（`--from-main` 與 `main.py` 同源）。**BookwalkerSessionError** 不進入 NFBR 重試迴圈。`.gitignore` 略。映像內 **pytest 25+**；**Docker headless TW 下載 smoke 通過**。任務 **done** 並歸檔至 **`archive/2026-04/`**。JP 第二站台 E2E 未於本輪驗證。 |
 
 ---
 
-## 6. 下一步（非實作）
+## 6. 下一步（已結案）
 
-- **建議**在通過本檔審閱後，再撰「實作計畫」：逐 PR 列出檔案、指令與驗證步驟（可搭配 Trellis 工作流程或專案內 checklist）。
+- 後續若驗證 **Bookwalker JP** 或其它站台，沿用 **`cookie_domain`** 與 **`check_bookwalker_cookie.py`** 流程即可。

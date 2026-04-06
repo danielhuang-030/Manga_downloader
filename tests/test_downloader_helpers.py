@@ -41,7 +41,9 @@ class TestStrToDataUri:
 
     @pytest.fixture
     def downloader(self):
-        with patch("downloader.uc.Chrome") as mock_chrome:
+        with patch("downloader.detect_chrome_major_version", return_value=None), patch(
+            "downloader.uc.Chrome"
+        ) as mock_chrome:
             driver = MagicMock()
             driver.execute_script.return_value = [800, 600]
             driver.execute_cdp_cmd = MagicMock()
@@ -75,8 +77,18 @@ class TestAddCookies:
         cookies = {"sid": "abc", "token": "xyz"}
         add_cookies(driver, cookies)
         assert driver.add_cookie.call_count == 2
-        driver.add_cookie.assert_any_call({"name": "sid", "value": "abc"})
-        driver.add_cookie.assert_any_call({"name": "token", "value": "xyz"})
+        driver.add_cookie.assert_any_call({"name": "sid", "value": "abc", "path": "/"})
+        driver.add_cookie.assert_any_call({"name": "token", "value": "xyz", "path": "/"})
+
+    def test_add_cookies_with_domain(self):
+        from downloader import add_cookies
+
+        driver = MagicMock()
+        cookies = {"a": "1"}
+        add_cookies(driver, cookies, domain=".bookwalker.com.tw")
+        driver.add_cookie.assert_called_once_with(
+            {"name": "a", "value": "1", "path": "/", "domain": ".bookwalker.com.tw"}
+        )
 
 
 class TestDownloaderInitPageIndices:
@@ -92,7 +104,9 @@ class TestDownloaderInitPageIndices:
                 res=(800, 600),
             )
             defaults.update(kwargs)
-            with patch("downloader.uc.Chrome") as mock_chrome:
+            with patch("downloader.detect_chrome_major_version", return_value=None), patch(
+                "downloader.uc.Chrome"
+            ) as mock_chrome:
                 driver = MagicMock()
                 driver.execute_script.return_value = [800, 600]
                 driver.execute_cdp_cmd = MagicMock()
@@ -119,3 +133,22 @@ class TestDownloaderInitPageIndices:
         d = make_downloader(number_of_digits=4, file_name_prefix="vol1")
         assert "/vol1_" in d.file_name_model
         assert d.file_name_model.endswith("%04d.png")
+
+
+class TestDetectChromeMajorVersion:
+    """detect_chrome_major_version — match uc driver to installed Chrome."""
+
+    def test_returns_major_from_google_chrome_stable_output(self):
+        from downloader import detect_chrome_major_version
+
+        with patch(
+            "downloader.subprocess.check_output",
+            return_value="Google Chrome 146.0.7680.177\n",
+        ):
+            assert detect_chrome_major_version() == 146
+
+    def test_returns_none_when_no_chrome_binary(self):
+        from downloader import detect_chrome_major_version
+
+        with patch("downloader.subprocess.check_output", side_effect=FileNotFoundError):
+            assert detect_chrome_major_version() is None

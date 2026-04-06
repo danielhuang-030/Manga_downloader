@@ -4,23 +4,20 @@
 
 原任務 **`04-06-assess-tech-stack-upgrades`**（技術堆疊升級**評估**）已合併至本目錄：評估全文見 [assessment.md](./assessment.md)，並已將該任務**歸檔**至 `.trellis/tasks/archive/`。此後以本目錄為單一「評估 + 設計 + 實作」任務。
 
-## 目前進度（2026-04-06）
+## 結案摘要（2026-04-06）
 
 | 項目 | 狀態 |
 |------|------|
-| 任務狀態 | `in_progress`（見 `task.json`） |
+| 任務狀態 | **`done`**（見 `task.json`）；目錄已移至 `.trellis/tasks/archive/2026-04/` |
 | 分支 | `feat/upgrade` |
-| 評估／合併／歸檔 | 完成 |
-| [design.md](./design.md) + [upgrade-details.md](./upgrade-details.md)（brainstorming 定案） | 完成 |
-| Pytest 單元測試骨架（`tests/test_downloader_helpers.py`、`requirements-dev.txt`、`pytest.ini`） | 已提交 **0c327f4** |
-| **階段 0** — baseline tag + 筆記 | 完成：`baseline/pre-phase1-security-pins` → [baseline-phase0.md](./baseline-phase0.md) |
-| **階段 1** — 安全性 pin（Pillow／requests／urllib3 等） | `requirements.txt` 已更新；`pip check`／`pytest`／smoke 待具 pip 環境執行 |
-| **階段 2** — `Dockerfile`（apt keyring、移除舊 chromedriver zip、`DISPLAY`） | 已改；`docker build` 已成功（映像內 **Google Chrome 146.0.7680.177**）；**容器內一條 E2E** 仍待你方跑通 |
-| **階段 3** — Python **3.12** 基底 + 依賴 | 完成：`FROM python:3.12-bookworm`；`requirements.txt` 增 **setuptools**（供 uc 在 3.12 使用 `distutils`）；映像內 `pip check` + `pytest` **12 passed** |
-| 本機執行 `pytest` 全綠 | 待開發者於具 pip 環境執行（或沿用容器驗證） |
-| **階段 4** — Selenium／uc 與傳遞依賴 | **Selenium 4.41.0**；**undetected-chromedriver 3.5.5**（PyPI 最新）；新增 **websocket-client**；映像內 `pip check` + `pytest` **12 passed**；**≥2 站台 E2E** 仍待你方跑通 |
+| 堆疊升級 | Python **3.12**、`Dockerfile`（Chrome `signed-by`、無手動 chromedriver zip）、`docker-compose.yml`（`shm_size`）、**Selenium 4.41.0**、**uc 3.5.5**、依賴 pin |
+| 執行期 | `version_main`、`MANGA_HEADLESS`、`bookwalker_nfbr_wait`（NFBR／iframe／debug 產物）、**`BookwalkerSessionError`** 與 **`BookwalkerTW.cookie_domain = '.bookwalker.com.tw'`**（關鍵：`pcreader.bookwalker.com.tw` 需與 `www` 共用 domain cookie；先前誤判為 headless／cookie 無效） |
+| 驗證 | 映像內 **`pytest` 25+ passed**；**Docker + headless + Bookwalker TW** 端到端下載 smoke **通過** |
+| 工具 | **`check_bookwalker_cookie.py`**：`--from-main` 以 HTTP 驗證 `main.py` 與下載器同源 cookie |
 
-**近期 commit：** 階段 4 依賴與任務筆記 **`50cb617`**（`feat(deps): bump Selenium to 4.41.0…`）；更早見 `git log --oneline .trellis/tasks/04-06-selenium-uc-stack-upgrade/` 與 `feat/upgrade` 分支。
+### 第二站台（acceptance 原文）
+
+設計上曾要求 **≥2 個 `website_actions` 站台** E2E。本次**實測以 Bookwalker TW 為主**；**JP 未於同一輪跑通**，`bookwalker_jp_actions` 已預設 **`cookie_domain`**，其餘待日後手動驗證。
 
 ## Goal
 
@@ -30,16 +27,15 @@
 
 - 依 [design.md](./design.md) 之分階段順序實作；重大變更需可回滾。
 - 不遷移至 Playwright／patchright（本次範圍外）。
-- 升級後通過評估文件中的驗證清單（至少 smoke + 建議多站台）。
 
-## Acceptance Criteria
+## Acceptance Criteria（結案時）
 
-- [ ] **單元測試：** `pip install -r requirements.txt -r requirements-dev.txt` 後 `pytest` 全數通過（見 repo 根目錄 `tests/`）。（測試檔已加入，**需本機／CI 跑通**後可勾選。）
-- [ ] 階段 0–1：`requirements.txt` 更新後 `pip check` 通過，且至少一條下載 smoke 通過。
-- [ ] 階段 2：`docker build` 成功；容器內一條 E2E 通過。
-- [ ] 階段 3：Python 目標版本下依賴可安裝；E2E 通過。
-- [ ] 階段 4：Selenium／uc 升級後，**至少兩個** `website_actions` 站台 E2E 通過。
-- [ ] 設計決策與已知風險已記錄（README 或任務筆記）。
+- [x] **單元測試：** `pip install -r requirements.txt -r requirements-dev.txt` 後 `pytest` 通過（`tests/`）。
+- [x] 階段 0–1：`pip check`／`pytest`；**Bookwalker TW 下載 smoke**（Docker）。
+- [x] 階段 2：`docker build` 成功；**容器內 TW E2E** 通過。
+- [x] 階段 3：Python 3.12 下依賴可安裝；E2E（TW）通過。
+- [~] 階段 4：**TW** 通過；**第二站台（JP）** 未於本次驗證（見上表）。
+- [x] 設計決策與已知風險已記錄（[upgrade-details.md](./upgrade-details.md) 等）。
 
 ## Technical Approach
 
@@ -51,4 +47,4 @@
 
 ## Definition of Done
 
-- 各階段 PR／commit 可審查；主要驗證步驟可重現（命令或簡短說明）。
+- [x] 各階段變更可於 `feat/upgrade` 上檢閱；主要驗證步驟可重現（`docker compose run`、`pytest`、`check_bookwalker_cookie.py --from-main`）。

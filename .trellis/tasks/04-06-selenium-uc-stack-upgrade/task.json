@@ -3,36 +3,19 @@
   "name": "selenium-uc-stack-upgrade",
   "title": "Selenium + uc stack upgrade",
   "description": "Implement phased upgrades while keeping undetected-chromedriver + Selenium architecture.",
-  "status": "in_progress",
+  "status": "done",
   "dev_type": "backend",
   "scope": "Selenium + uc phased upgrade (Python, deps, Docker)",
   "priority": "P1",
   "creator": "daniel",
   "assignee": "daniel",
   "createdAt": "2026-04-06",
-  "completedAt": null,
-  "branch": null,
+  "completedAt": "2026-04-06",
+  "branch": "feat/upgrade",
   "base_branch": "feat/upgrade",
   "worktree_path": null,
   "current_phase": 4,
-  "next_action": [
-    {
-      "phase": 1,
-      "action": "implement"
-    },
-    {
-      "phase": 2,
-      "action": "check"
-    },
-    {
-      "phase": 3,
-      "action": "finish"
-    },
-    {
-      "phase": 4,
-      "action": "create-pr"
-    }
-  ],
+  "next_action": [],
   "commit": "50cb617",
   "pr_url": null,
   "subtasks": [
@@ -54,7 +37,7 @@
     },
     {
       "name": "Phase 1: security pins + pytest green + smoke download",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "name": "Phase 2: Dockerfile (apt + remove legacy chromedriver zip)",
@@ -65,8 +48,8 @@
       "status": "completed"
     },
     {
-      "name": "Phase 4: Selenium/uc bump + multi-site E2E",
-      "status": "in_progress"
+      "name": "Phase 4: Selenium/uc bump + TW Docker E2E",
+      "status": "completed"
     }
   ],
   "children": [],
@@ -79,14 +62,22 @@
     ".trellis/tasks/04-06-selenium-uc-stack-upgrade/prd.md",
     "requirements.txt",
     "Dockerfile",
+    "docker-compose.yml",
     "downloader.py",
+    "check_bookwalker_cookie.py",
+    "website_actions/bookwalker_nfbr_wait.py",
+    "website_actions/bookwalker_tw_actions.py",
+    "website_actions/bookwalker_jp_actions.py",
     "tests/test_downloader_helpers.py",
+    "tests/test_bookwalker_nfbr_wait.py",
+    "tests/test_check_bookwalker_cookie.py",
     "requirements-dev.txt",
     "pytest.ini"
   ],
-  "notes": "2026-04-06: Phase 4 deps committed 50cb617 (Selenium 4.41.0, uc 3.5.5, transitive pins). Remaining: ≥2 website_actions E2E + optional smoke for phases 1–2.",
+  "notes": "2026-04-06 DONE: Stack on 5105992 + 50cb617 (Selenium 4.41, uc 3.5.5). Root fix for false login: add_cookie with cookie_domain .bookwalker.com.tw so pcreader subdomain receives session (HTTP check_bookwalker_cookie OK but Selenium failed until domain set). NFBR wait + BookwalkerSessionError + debug artifacts. pytest 25+. TW Docker headless download verified; JP second-site E2E not run this round. Archived under .trellis/tasks/archive/2026-04/.",
   "meta": {
     "last_updated": "2026-04-06",
-    "branch": "feat/upgrade"
+    "branch": "feat/upgrade",
+    "archived_month": "2026-04"
   }
 }

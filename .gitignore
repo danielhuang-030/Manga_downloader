@@ -125,5 +125,9 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
+# Bookwalker debug dumps (may contain cookies / personal data)
+debug_bookwalker_nfbr_timeout.html
+debug_bookwalker_nfbr_timeout.png
+
 # Pyre type checker
 .pyre/
