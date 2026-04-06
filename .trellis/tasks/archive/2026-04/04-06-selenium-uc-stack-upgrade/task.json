@@ -3,7 +3,7 @@
   "name": "selenium-uc-stack-upgrade",
   "title": "Selenium + uc stack upgrade",
   "description": "Implement phased upgrades while keeping undetected-chromedriver + Selenium architecture.",
-  "status": "done",
+  "status": "completed",
   "dev_type": "backend",
   "scope": "Selenium + uc phased upgrade (Python, deps, Docker)",
   "priority": "P1",
