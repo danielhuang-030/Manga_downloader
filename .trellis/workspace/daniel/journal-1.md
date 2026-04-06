@@ -140,3 +140,37 @@ Delivered .env-driven flow: config.py, manga_env.py, main_env.py, Downloader vie
 ### Next Steps
 
 - None - task complete
+
+
+## Session 5: NFBR 解析、README 同步與任務封存
+
+**Date**: 2026-04-06
+**Task**: NFBR 解析、README 同步與任務封存
+
+### Summary
+
+Bookwalker TW/JP 多策略 NFBR moveToPage 解析；README 與 zh-TW 對齊並加上游 fork 連結；Trellis 任務 readme-sync-fork、bookwalker-nfbr-resolver 完成並封存。
+
+### Main Changes
+
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `54b3881` | (see git log) |
+| `7d72f64` | (see git log) |
+| `46bf7bb` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
