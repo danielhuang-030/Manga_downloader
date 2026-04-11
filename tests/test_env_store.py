@@ -87,7 +87,6 @@ def test_merge_write_calls_chown_with_prior_file_owner(tmp_path, monkeypatch):
 def test_managed_keys_covers_design_keys():
     for key in (
         "MANGA_COOKIES",
-        "BOOKWALKER_COOKIE",
         "MANGA_RES",
         "MANGA_SLEEP_TIME",
         "MANGA_IDS",

@@ -12,7 +12,6 @@ _LINE_KEY_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)=(.*)$")
 MANAGED_KEYS: frozenset[str] = frozenset(
     {
         "MANGA_COOKIES",
-        "BOOKWALKER_COOKIE",
         "MANGA_RES",
         "MANGA_SLEEP_TIME",
         "MANGA_IDS",

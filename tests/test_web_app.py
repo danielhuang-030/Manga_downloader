@@ -26,6 +26,8 @@ def test_get_root_serves_index(tmp_path, monkeypatch):
     assert r.status_code == 200
     assert "text/html" in r.headers.get("content-type", "")
     assert b"Manga_downloader" in r.content
+    assert b"/static/i18n.js" in r.content
+    assert b"data-i18n" in r.content
 
 
 def test_api_get_env_masks_cookie(tmp_path, monkeypatch):

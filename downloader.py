@@ -9,6 +9,7 @@ import re
 import subprocess
 import time
 from io import BytesIO
+from pathlib import Path
 from PIL import ImageOps
 
 import PIL.Image as pil_image
@@ -60,6 +61,26 @@ def detect_chrome_major_version():
         'If WebDriver fails with a version mismatch, set uc.Chrome(version_main=...).'
     )
     return None
+
+
+def _ensure_writable_home_for_uc():
+    """
+    undetected_chromedriver writes under ~/.local/...; expanduser('~') can be '/' when
+    Docker runs as numeric USER without a passwd entry, causing PermissionError on '/.local'.
+    """
+    try:
+        home = Path.home().resolve()
+    except (RuntimeError, OSError):
+        home = None
+    if home is not None and str(home) not in ("", "/") and home.is_dir() and os.access(home, os.W_OK):
+        return
+    override = (os.environ.get("MANGA_RUNTIME_HOME") or "").strip()
+    if override:
+        base = Path(override).expanduser().resolve()
+    else:
+        base = Path.cwd() / ".manga-runtime"
+    base.mkdir(parents=True, exist_ok=True)
+    os.environ["HOME"] = str(base)
 
 
 def get_cookie_dict(cookies):
@@ -149,6 +170,7 @@ class Downloader:
                 base64.b64encode(bytes(str, 'utf-8')).decode('ascii'))
 
     def get_driver(self):
+        _ensure_writable_home_for_uc()
         option = uc.ChromeOptions()
         option.set_capability('unhandledPromptBehavior', 'accept')
         option.add_argument('--high-dpi-support=1')
@@ -346,7 +368,15 @@ class Downloader:
         )
 
     def download(self):
-        emit_progress(self._progress_reporter, {"type": "run_started"})
+        total_books = (
+            len(self._viewer_ids)
+            if self._viewer_ids
+            else len(self.manga_url)
+        )
+        emit_progress(
+            self._progress_reporter,
+            {"type": "run_started", "total_books": max(1, total_books)},
+        )
         if self._viewer_ids:
             for i, vid in enumerate(self._viewer_ids):
                 self._download_one_viewer_id(i, vid)

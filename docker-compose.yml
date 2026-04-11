@@ -26,6 +26,9 @@ services:
     command: ["sleep", "infinity"]
     # 與 web 共用 MANGA_WEB_UID / MANGA_WEB_GID：掛載目錄內 downloads/、.env 等勿預設為 root:root。
     user: "${MANGA_WEB_UID:-0}:${MANGA_WEB_GID:-0}"
+    # 數字 UID 在映像內常無 passwd，expanduser('~') 變成 '/'，undetected_chromedriver 會寫 /.local 而失敗。
+    environment:
+      HOME: /app
     # Extra shared memory reduces Chrome "tab crashed" in headless (with --disable-dev-shm-usage in code).
     shm_size: "2gb"
     volumes:
@@ -42,6 +45,8 @@ services:
     #   export MANGA_WEB_UID=$(id -u) MANGA_WEB_GID=$(id -g)
     #   docker compose --env-file compose.env up web
     user: "${MANGA_WEB_UID:-0}:${MANGA_WEB_GID:-0}"
+    environment:
+      HOME: /app
     volumes:
       - .:/app
     ports:

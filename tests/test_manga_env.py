@@ -89,14 +89,14 @@ def test_append_parsed_id_duplicate():
     assert new_csv == "10,20"
 
 
-def test_resolve_cookie_header_prefers_manga():
-    env = {"MANGA_COOKIES": "a=1", "BOOKWALKER_COOKIE": "b=2"}
+def test_resolve_cookie_header_reads_manga_cookies():
+    env = {"MANGA_COOKIES": "a=1"}
     assert resolve_cookie_header(env) == "a=1"
 
 
-def test_resolve_cookie_header_fallback():
-    env = {"BOOKWALKER_COOKIE": "b=2"}
-    assert resolve_cookie_header(env) == "b=2"
+def test_resolve_cookie_header_empty_without_manga_cookies():
+    env = {"MANGA_RES": "800x600"}
+    assert resolve_cookie_header(env) == ""
 
 
 def test_sanitize_pipe_segment():
