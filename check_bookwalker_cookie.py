@@ -4,7 +4,7 @@ Check Bookwalker TW cookie string against a URL using HTTP only (no Chrome).
 
 Cookie 格式與 Downloader 相同：name=value; name2=value2
 
-預設會載入目前目錄的 .env（python-dotenv）。優先使用 MANGA_COOKIES，否則 BOOKWALKER_COOKIE。
+預設會載入目前目錄的 .env（python-dotenv），使用 MANGA_COOKIES。
 
 Examples:
   # 使用 .env 內的 cookie（與 main_env.py 相同來源），並以 MANGA_IDS 第一個 ID 組 viewer URL（未傳 --url 時）
@@ -142,7 +142,7 @@ def main():
 
     if not cookie:
         parser.error(
-            'No cookie: use --from-main, or .env MANGA_COOKIES / BOOKWALKER_COOKIE, '
+            'No cookie: use --from-main, or set MANGA_COOKIES in .env, '
             'or pass --cookie / --cookie-file.',
         )
 
@@ -158,7 +158,7 @@ def main():
         )
         return 2
     if not cookie.strip():
-        parser.error('Cookie is empty; set MANGA_COOKIES / BOOKWALKER_COOKIE or use --cookie / --from-main.')
+        parser.error('Cookie is empty; set MANGA_COOKIES in .env or use --cookie / --from-main.')
 
     headers = {
         'Cookie': cookie,

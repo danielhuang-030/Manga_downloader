@@ -112,14 +112,10 @@ def coerce_http_cookie_header_latin1(cookie: str) -> tuple[str, int]:
 
 
 def resolve_cookie_header(env: Mapping[str, str]) -> str:
-    """Prefer MANGA_COOKIES; else BOOKWALKER_COOKIE. Returns stripped string."""
+    """Read MANGA_COOKIES from env; returns stripped string (empty if missing)."""
     raw = env.get("MANGA_COOKIES") or ""
     if isinstance(raw, str) and raw.strip():
         return raw.strip()
-
-    fallback = env.get("BOOKWALKER_COOKIE") or ""
-    if isinstance(fallback, str):
-        return fallback.strip()
 
     return ""
 

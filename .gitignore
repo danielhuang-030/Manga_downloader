@@ -124,6 +124,13 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
+# Chrome / undetected_chromedriver cache when HOME is redirected (see downloader._ensure_writable_home_for_uc).
+.manga-runtime/
+
+# UC / Chrome may create these under the repo root if HOME pointed at cwd (do not commit).
+/.config/
+/.local/
+
 # --- Manga_downloader: download output & sensitive debug (PII / large files) ---
 # Track downloads/ in git via downloads/.gitignore only; ignore all real content below it.
 downloads/**

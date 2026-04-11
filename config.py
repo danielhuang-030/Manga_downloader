@@ -26,7 +26,7 @@ class MangaConfig(NamedTuple):
 
 def load_manga_config(dotenv_path: str | None = None) -> MangaConfig:
     """
-    Load dotenv then read MANGA_* / BOOKWALKER_COOKIE from os.environ.
+    Load dotenv then read MANGA_* keys from os.environ.
     Process env wins over .env file values for keys already set (dotenv default).
     """
     load_dotenv(dotenv_path)
@@ -34,7 +34,7 @@ def load_manga_config(dotenv_path: str | None = None) -> MangaConfig:
     env = os.environ
     cookies = resolve_cookie_header(env)
     if not cookies:
-        raise ValueError("缺少 MANGA_COOKIES 或 BOOKWALKER_COOKIE（至少一個須為非空字串）")
+        raise ValueError("缺少 MANGA_COOKIES（須為非空字串）")
 
     res_raw = env.get("MANGA_RES", "").strip()
     if not res_raw:

@@ -5,7 +5,6 @@ import pytest
 
 def test_load_manga_config_from_environ(monkeypatch, tmp_path):
     monkeypatch.delenv("MANGA_COOKIES", raising=False)
-    monkeypatch.delenv("BOOKWALKER_COOKIE", raising=False)
     monkeypatch.setenv("MANGA_COOKIES", "a=b")
     monkeypatch.setenv("MANGA_RES", "800x600")
     monkeypatch.setenv("MANGA_SLEEP_TIME", "1.5")
@@ -25,7 +24,6 @@ def test_load_manga_config_from_environ(monkeypatch, tmp_path):
 
 def test_load_manga_config_missing_manga_res(monkeypatch, tmp_path):
     monkeypatch.delenv("MANGA_COOKIES", raising=False)
-    monkeypatch.delenv("BOOKWALKER_COOKIE", raising=False)
     monkeypatch.setenv("MANGA_COOKIES", "a=b")
     monkeypatch.setenv("MANGA_SLEEP_TIME", "1")
     monkeypatch.setenv("MANGA_IDS", "1")

@@ -41,9 +41,8 @@ class MangaIdFromUrlBody(BaseModel):
 
 def _mask_secrets(data: dict[str, str]) -> dict[str, str]:
     out = dict(data)
-    for key in ("MANGA_COOKIES", "BOOKWALKER_COOKIE"):
-        if out.get(key):
-            out[key] = "***masked***"
+    if out.get("MANGA_COOKIES"):
+        out["MANGA_COOKIES"] = "***masked***"
 
     return out
 
@@ -61,9 +60,8 @@ def api_put_env(body: dict):
         raise HTTPException(status_code=400, detail="Body must be a JSON object")
 
     str_body = {str(k): str(v) for k, v in body.items()}
-    for key in ("MANGA_COOKIES", "BOOKWALKER_COOKIE"):
-        if str_body.get(key) == "***masked***":
-            del str_body[key]
+    if str_body.get("MANGA_COOKIES") == "***masked***":
+        del str_body["MANGA_COOKIES"]
 
     try:
         merge_write_dotenv(ENV_PATH, str_body)

@@ -103,7 +103,7 @@ docker compose up web
 
 範例：`.env` 內 `MANGA_WEB_PORT=9000` 時，主機請開 `http://127.0.0.1:9000/`。
 
-**掛載目錄的檔案擁有者（Docker）：** 容器內若以 root 寫入 bind mount，`.env`、`downloads/` 等易變成 `root:root`。`merge_write_dotenv` 會在寫入後盡力 **`chown` 回寫入前的 uid/gid**（新建檔則對齊**父目錄**擁有者）。**`web` 與 `python` 服務**已共用 `docker-compose.yml` 的 `user: "${MANGA_WEB_UID:-0}:${MANGA_WEB_GID:-0}"`。
+**掛載目錄的檔案擁有者（Docker）：** 容器內若以 root 寫入 bind mount，`.env`、`downloads/` 等易變成 `root:root`。`merge_write_dotenv` 會在寫入後盡力 **`chown` 回寫入前的 uid/gid**（新建檔則對齊**父目錄**擁有者）。**`web` 與 `python` 服務**已共用 `docker-compose.yml` 的 `user: "${MANGA_WEB_UID:-0}:${MANGA_WEB_GID:-0}"`，並設 **`HOME=/app`**（避免數字 UID 在映像內無家目錄時，Chrome／undetected_chromedriver 嘗試寫入 **`/.local`** 而 `Permission denied`）。
 
 - **自動帶入主機 UID/GID（建議）：** 使用專案腳本 **`./scripts/compose.sh`** 取代直接打 `docker compose`。該腳本會在執行前設定 `MANGA_WEB_UID`、`MANGA_WEB_GID`（若環境裡已設定則不覆寫），並在有 **`compose.env`** 時加上 `--env-file compose.env`。範例：`./scripts/compose.sh up web`、`./scripts/compose.sh run --rm python python main_env.py`。跑測試的 **`./scripts/docker-test.sh`** 亦已改為透過此腳本呼叫 Compose。
 - **手動：** `export MANGA_WEB_UID=$(id -u) MANGA_WEB_GID=$(id -g)` 後再執行 `docker compose --env-file compose.env …` 亦可。
@@ -120,7 +120,7 @@ docker compose up web
 
 2. 依 `.env.example` 註解填寫至少：
 
-   - `MANGA_COOKIES`（或相容的 `BOOKWALKER_COOKIE`）：與 `main.py` 相同格式的 cookie 字串（多為 `name=value; ...`）。
+   - `MANGA_COOKIES`：與 `main.py` 相同格式的 cookie 字串（多為 `name=value; ...`）。
    - `MANGA_RES`：寬高，格式 `寬x高`，例如 `1445x2048`（僅 ASCII 小寫 `x`）。
    - `MANGA_SLEEP_TIME`：每頁下載間隔（秒，可為小數）。
    - `MANGA_IDS`：`browserViewer` 的數字 ID，多筆以英文逗號分隔。
@@ -161,8 +161,7 @@ python main.py
 
 | 變數 | 必填 | 說明 |
 |------|------|------|
-| `MANGA_COOKIES` | 與 `BOOKWALKER_COOKIE` 二擇一 | Cookie 字串 |
-| `BOOKWALKER_COOKIE` | 同上 | 舊慣例／相容用 |
+| `MANGA_COOKIES` | 是 | Cookie 字串 |
 | `MANGA_RES` | 是 | `寬x高` |
 | `MANGA_SLEEP_TIME` | 是 | 每頁間隔（秒） |
 | `MANGA_IDS` | 是 | 逗號分隔的 viewer ID |

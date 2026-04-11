@@ -96,7 +96,7 @@ docker compose up web
 
 Example: with `MANGA_WEB_PORT=9000` in `.env`, open `http://127.0.0.1:9000/` on the host.
 
-**Bind-mounted file ownership (Docker):** processes running as **root** often create `root:root` files on the host (including `.env` and `downloads/`). `merge_write_dotenv` tries to **`chown`** `.env` back after replace. Both **`web`** and **`python`** services use `user: "${MANGA_WEB_UID:-0}:${MANGA_WEB_GID:-0}"` in `docker-compose.yml`.
+**Bind-mounted file ownership (Docker):** processes running as **root** often create `root:root` files on the host (including `.env` and `downloads/`). `merge_write_dotenv` tries to **`chown`** `.env` back after replace. Both **`web`** and **`python`** services use `user: "${MANGA_WEB_UID:-0}:${MANGA_WEB_GID:-0}"` in `docker-compose.yml`, and set **`HOME=/app`** so Chrome / undetected_chromedriver does not try to write **`/.local`** when the numeric user has no real home directory in the image.
 
 - **Auto-set host UID/GID (recommended):** run **`./scripts/compose.sh`** instead of `docker compose` directly. It exports `MANGA_WEB_UID` / `MANGA_WEB_GID` from `id -u` / `id -g` unless already set, and adds `--env-file compose.env` when that file exists. Examples: `./scripts/compose.sh up web`, `./scripts/compose.sh run --rm python python main_env.py`. **`./scripts/docker-test.sh`** uses this wrapper too.
 - **Manual:** `export MANGA_WEB_UID=$(id -u) MANGA_WEB_GID=$(id -g)` then `docker compose --env-file compose.env …`.
@@ -113,7 +113,7 @@ Example: with `MANGA_WEB_PORT=9000` in `.env`, open `http://127.0.0.1:9000/` on 
 
 2. Fill in at least the following (see comments in `.env.example`):
 
-   - `MANGA_COOKIES` (or compatible `BOOKWALKER_COOKIE`): cookie string in the same format as `main.py` (typically `name=value; ...`).
+   - `MANGA_COOKIES`: cookie string in the same format as `main.py` (typically `name=value; ...`).
    - `MANGA_RES`: width and height as `WIDTHxHEIGHT`, e.g. `1445x2048` (ASCII `x` only).
    - `MANGA_SLEEP_TIME`: delay between pages in seconds (decimals allowed).
    - `MANGA_IDS`: numeric `browserViewer` IDs, comma-separated.
@@ -154,8 +154,7 @@ python main.py
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `MANGA_COOKIES` | one of `MANGA_COOKIES` / `BOOKWALKER_COOKIE` | Cookie string |
-| `BOOKWALKER_COOKIE` | same as above | Legacy / compatibility |
+| `MANGA_COOKIES` | yes | Cookie string |
 | `MANGA_RES` | yes | `WIDTHxHEIGHT` |
 | `MANGA_SLEEP_TIME` | yes | Seconds between pages |
 | `MANGA_IDS` | yes | Comma-separated viewer IDs |
