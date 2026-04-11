@@ -76,6 +76,10 @@ python run_web_ui.py
 
 Open `http://127.0.0.1:8765/` to edit `.env`, start downloads, and stream progress over **SSE**. Do not expose this service to untrusted networks.
 
+- **Theme:** Use the header control to switch **light**, **dark**, or **follow system** (stored in browser `localStorage` as `manga_web_theme`).
+- **Add ID from URL:** Paste a full viewer URL under **MANGA_IDS** and click **從網址加入 ID**; the server parses the numeric ID using **`MANGA_VIEWER_URL_TEMPLATE`** (from the form, or the default when empty) and merges it into the list. **Save** still writes `.env`. Parse failures return an error message; duplicate IDs show a notice and do not change the list.
+- **Labels:** Form fields show Traditional Chinese descriptions plus the env var key in parentheses.
+
 ### Docker Compose: published (host) port
 
 Inside the container the server listens on **`0.0.0.0:8765`** (fixed in `docker-compose.yml`). Only the **host port** is configurable via **`MANGA_WEB_PORT`** for Compose variable substitution (you can put it in the project root `.env` for Docker; the Python app does not read it).
@@ -91,6 +95,11 @@ docker compose up web
 ```
 
 Example: with `MANGA_WEB_PORT=9000` in `.env`, open `http://127.0.0.1:9000/` on the host.
+
+**Bind-mounted file ownership (Docker):** processes running as **root** often create `root:root` files on the host (including `.env` and `downloads/`). `merge_write_dotenv` tries to **`chown`** `.env` back after replace. Both **`web`** and **`python`** services use `user: "${MANGA_WEB_UID:-0}:${MANGA_WEB_GID:-0}"` in `docker-compose.yml`.
+
+- **Auto-set host UID/GID (recommended):** run **`./scripts/compose.sh`** instead of `docker compose` directly. It exports `MANGA_WEB_UID` / `MANGA_WEB_GID` from `id -u` / `id -g` unless already set, and adds `--env-file compose.env` when that file exists. Examples: `./scripts/compose.sh up web`, `./scripts/compose.sh run --rm python python main_env.py`. **`./scripts/docker-test.sh`** uses this wrapper too.
+- **Manual:** `export MANGA_WEB_UID=$(id -u) MANGA_WEB_GID=$(id -g)` then `docker compose --env-file compose.env …`.
 
 ---
 

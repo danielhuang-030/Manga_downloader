@@ -17,29 +17,11 @@ Keep this managed block so 'trellis update' can refresh the instructions.
 
 <!-- TRELLIS:END -->
 
-## Cursor：記錄 session（`add_session.py`）
+---
 
-在 Cursor 整合終端機由 AI agent 執行 `.trellis/scripts/add_session.py` 時：
+## sp flow (Superpowers flow)
 
-1. **必須**在整行指令結尾加上 **`>/dev/null 2>&1`**，以免輸出過多造成終端機卡住或逾時。
-2. 在 Linux / WSL / macOS 應寫成 **`/dev/null`**（勿寫成 `del/null`）。
-3. 該腳本多數日誌印在 **stderr**，僅使用 `>/dev/null` 仍會刷屏，故需 **`2>&1`** 一併重導向。
-4. 若自動 `git commit` 仍卡住（例如 GPG 互動簽署），改加 **`--no-commit`**，再由開發者在本機自行提交 `.trellis/workspace`（與必要時的 `.trellis/tasks`）。
-5. **stdin**：腳本在 `stdin` 非 TTY 時會執行 `sys.stdin.read()`；若僅重導 stdout／stderr 而未關閉 stdin，可能**一直阻塞**。非互動／由 agent 執行時**必須**加上 **`</dev/null`**（置於指令前或參數後皆可）。
+When the **task**, **PR**, or **user** mentions **"sp flow"**, **"use Superpowers flow"**, or **"follow Superpowers"**:
 
-範例（非互動、無輸出、不阻塞）：
-
-```bash
-python3 ./.trellis/scripts/add_session.py \
-  --title "Session Title" \
-  --commit "hash1,hash2" \
-  --summary "Brief summary" \
-  </dev/null >/dev/null 2>&1
-```
-
-**約定**：上述慣例與補充說明以本檔 `AGENTS.md` 為準；請**不要**在 `.trellis/` **重複貼上**與 `add_session` 相同的操作說明（任務專用文件除外）。
-
-## Trellis：設計／brainstorm 產出位置
-
-- **設計稿、brainstorm 定案、與任務綁定的規格**，請寫在 **對應任務目錄** `.trellis/tasks/<任務目錄>/`（例如與 `prd.md` 同層的 `design.md`）。
-- **不要**預設寫在 repo 的 `docs/superpowers/specs/`（除非專案另有明確約定）。
+1. **Read** `@/.trellis/spec/guides/superpowers-trellis-integration.md` (detailed rules and mandatory compliance are in that file).
+2. **Strictly follow** the mandatory `sp flow` workflow in that guide; do not skip steps or substitute a written summary for the actual dialogue.

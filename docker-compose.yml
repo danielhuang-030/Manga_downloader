@@ -5,9 +5,10 @@
 #   MANGA_WEB_PORT=9000 表示主機 9000 → 容器內固定 8765（應用程式內監聽埠為 hard code）。
 #
 # python 服務強制 command: sleep infinity，覆寫映像 CMD（避免沿用舊映像的 python main.py）。
-# 手動下載示例：
-#   docker compose run --rm python python main_env.py
-#   docker compose run --rm python python main.py
+# 手動下載示例（建議與 web 相同先 export UID/GID，否則 downloads/ 與 .env 易為 root:root）：
+#   export MANGA_WEB_UID=$(id -u) MANGA_WEB_GID=$(id -g)
+#   docker compose --env-file compose.env run --rm python python main_env.py
+#   docker compose --env-file compose.env run --rm python python main.py
 #
 # 跑測試（與 Dockerfile 相同環境，專案掛載為 /app）：
 #   ./scripts/docker-test.sh
@@ -15,6 +16,7 @@
 #   docker compose --env-file compose.env run --rm python python -m pytest tests/ -v
 #
 # Web UI：docker compose up web
+# 自動帶入主機 UID/GID（避免 root 擁有掛載檔案）：./scripts/compose.sh up web
 services:
   python:
     container_name: mangadw
@@ -22,6 +24,8 @@ services:
       context: .
       dockerfile: Dockerfile
     command: ["sleep", "infinity"]
+    # 與 web 共用 MANGA_WEB_UID / MANGA_WEB_GID：掛載目錄內 downloads/、.env 等勿預設為 root:root。
+    user: "${MANGA_WEB_UID:-0}:${MANGA_WEB_GID:-0}"
     # Extra shared memory reduces Chrome "tab crashed" in headless (with --disable-dev-shm-usage in code).
     shm_size: "2gb"
     volumes:
@@ -33,6 +37,11 @@ services:
       context: .
       dockerfile: Dockerfile
     working_dir: /app
+    # 避免 Web UI 寫入掛載的 .env 後檔案變成 root:root（預設以 root 跑 uvicorn）。
+    # 與 python 服務共用 MANGA_WEB_UID / MANGA_WEB_GID；啟動前例如：
+    #   export MANGA_WEB_UID=$(id -u) MANGA_WEB_GID=$(id -g)
+    #   docker compose --env-file compose.env up web
+    user: "${MANGA_WEB_UID:-0}:${MANGA_WEB_GID:-0}"
     volumes:
       - .:/app
     ports:

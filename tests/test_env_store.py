@@ -1,5 +1,6 @@
 """TDD: env_store — .env 鍵級合併與原子寫入（無瀏覽器）。"""
 
+import os
 from pathlib import Path
 
 import pytest
@@ -62,6 +63,25 @@ def test_read_managed_values_roundtrip(tmp_path):
     assert data["MANGA_RES"] == "1445x2048"
     assert data["MANGA_SLEEP_TIME"] == "1.5"
     assert data["MANGA_IDS"] == "10, 20"
+
+
+def test_merge_write_calls_chown_with_prior_file_owner(tmp_path, monkeypatch):
+    env_path = tmp_path / ".env"
+    env_path.write_text("MANGA_IDS=1\n", encoding="utf-8")
+    st = env_path.stat()
+    calls: list[tuple] = []
+
+    def fake_chown(p, u, g, follow_symlinks=True):
+        calls.append((Path(p), u, g, follow_symlinks))
+
+    monkeypatch.setattr(os, "chown", fake_chown)
+    merge_write_dotenv(env_path, {"MANGA_IDS": "2"})
+
+    assert len(calls) == 1
+    assert calls[0][0] == env_path
+    assert calls[0][1] == st.st_uid
+    assert calls[0][2] == st.st_gid
+    assert calls[0][3] is False
 
 
 def test_managed_keys_covers_design_keys():

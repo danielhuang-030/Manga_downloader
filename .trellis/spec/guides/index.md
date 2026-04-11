@@ -24,7 +24,8 @@ These guides help you **ask the right questions before coding**.
 | [Code Reuse Thinking Guide](./code-reuse-thinking-guide.md) | Identify patterns and reduce duplication | When you notice repeated patterns |
 | [Cross-Layer Thinking Guide](./cross-layer-thinking-guide.md) | Think through data flow across layers | Features spanning multiple layers |
 | [Cross-Platform Thinking Guide](./cross-platform-thinking-guide.md) | Catch platform-specific assumptions | Scripts, paths, commands |
-
+| [Superpowers–Trellis Integration](./superpowers-trellis-integration.md) | Combine [Superpowers](https://github.com/obra/superpowers) skills with Trellis workflow | When using Superpowers TDD/planning/debug/verification with this project |
+| [Custom Guide](./custom-guide.md) | Project-specific notes, conventions, and custom skill references | When working on project-specific patterns not covered by other guides |
 ---
 
 ## Quick Reference: Thinking Triggers
@@ -59,6 +60,18 @@ These guides help you **ask the right questions before coding**.
 
 ---
 
+### When to Use Superpowers + Trellis
+
+- [ ] Starting a new feature (brainstorming → writing-plans → TDD)
+- [ ] Debugging or test failure (systematic-debugging before changing code)
+- [ ] Claiming work complete (verification-before-completion first)
+- [ ] Finishing a branch or PR (finishing-a-development-branch)
+
+→ Read [Superpowers–Trellis Integration](./superpowers-trellis-integration.md)
+
+### When to Use Custom Guide
+
+- [ ] **After Trellis start** (start skill Step 3; slash command trellis-start): read [Custom Guide](./custom-guide.md) and [AGENTS.md](../../../AGENTS.md) automatically as part of session initialization—before other project-specific work
 ## Pre-Modification Rule (CRITICAL)
 
 > **Before changing ANY value, ALWAYS search first!**

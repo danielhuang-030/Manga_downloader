@@ -83,6 +83,10 @@ python run_web_ui.py
 
 瀏覽器開啟 `http://127.0.0.1:8765/` 可編輯 `.env`、啟動下載，並以 **SSE** 檢視進度。請勿將服務暴露於公開網路。
 
+- **主題**：頁首可切換淺色／深色／跟隨系統（偏好存於瀏覽器 `localStorage` 鍵 `manga_web_theme`）。
+- **從網址加入漫畫 ID**：在「漫畫 ID 清單」下方貼上完整 viewer 網址並按「從網址加入 ID」，後端會依目前的 **`MANGA_VIEWER_URL_TEMPLATE`**（與表單內容；空則用預設模板）解析數字 ID 並合併至清單；**仍須按「儲存」**才會寫入 `.env`。無法解析時顯示錯誤；清單已含該 ID 時顯示提示且不重複寫入。
+- **表單標籤**：欄位以正體中文說明，並附實際環境變數鍵名（括號內）以利對照文件。
+
 ### 以 Docker Compose 對外連接埠（可調）
 
 容器內仍固定 **`0.0.0.0:8765`**（由 Compose 的 `uvicorn` 指令寫死）。**主機對外埠**可透過環境變數 **`MANGA_WEB_PORT`** 設定（給 Compose 做 YAML 替換用，可寫在專案根目錄 `.env`，**不**由 Python 讀取）：
@@ -98,6 +102,11 @@ docker compose up web
 ```
 
 範例：`.env` 內 `MANGA_WEB_PORT=9000` 時，主機請開 `http://127.0.0.1:9000/`。
+
+**掛載目錄的檔案擁有者（Docker）：** 容器內若以 root 寫入 bind mount，`.env`、`downloads/` 等易變成 `root:root`。`merge_write_dotenv` 會在寫入後盡力 **`chown` 回寫入前的 uid/gid**（新建檔則對齊**父目錄**擁有者）。**`web` 與 `python` 服務**已共用 `docker-compose.yml` 的 `user: "${MANGA_WEB_UID:-0}:${MANGA_WEB_GID:-0}"`。
+
+- **自動帶入主機 UID/GID（建議）：** 使用專案腳本 **`./scripts/compose.sh`** 取代直接打 `docker compose`。該腳本會在執行前設定 `MANGA_WEB_UID`、`MANGA_WEB_GID`（若環境裡已設定則不覆寫），並在有 **`compose.env`** 時加上 `--env-file compose.env`。範例：`./scripts/compose.sh up web`、`./scripts/compose.sh run --rm python python main_env.py`。跑測試的 **`./scripts/docker-test.sh`** 亦已改為透過此腳本呼叫 Compose。
+- **手動：** `export MANGA_WEB_UID=$(id -u) MANGA_WEB_GID=$(id -g)` 後再執行 `docker compose --env-file compose.env …` 亦可。
 
 ---
 

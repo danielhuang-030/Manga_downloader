@@ -107,5 +107,21 @@ def merge_write_dotenv(
     tmp = path.with_name(path.name + ".tmp")
     data = "".join(lines)
     path.parent.mkdir(parents=True, exist_ok=True)
+
+    owner: tuple[int, int] | None = None
+    if path.is_file():
+        st = path.stat()
+        owner = (st.st_uid, st.st_gid)
+    elif path.parent.is_dir():
+        pst = path.parent.stat()
+        owner = (pst.st_uid, pst.st_gid)
+
     tmp.write_text(data, encoding="utf-8")
     os.replace(tmp, path)
+
+    if owner is not None:
+        uid, gid = owner
+        try:
+            os.chown(path, uid, gid, follow_symlinks=False)
+        except OSError:
+            pass

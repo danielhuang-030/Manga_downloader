@@ -1,0 +1,65 @@
+{
+  "id": "ui-ux-optimization-sp-flow",
+  "name": "ui-ux-optimization-sp-flow",
+  "title": "優化 UI/UX",
+  "description": "Web UI theme, zh-Hant labels, URL→MANGA_ID API; static /static mount; env chown; cookie Latin-1; compose.sh + docker user; see prd.md, plan.md, progress.md.",
+  "status": "completed",
+  "dev_type": null,
+  "scope": null,
+  "priority": "P2",
+  "creator": "cursor-agent",
+  "assignee": "cursor-agent",
+  "createdAt": "2026-04-11",
+  "completedAt": "2026-04-11",
+  "branch": null,
+  "base_branch": "feat/ui",
+  "worktree_path": null,
+  "current_phase": 0,
+  "next_action": [
+    {
+      "phase": 1,
+      "action": "implement"
+    },
+    {
+      "phase": 2,
+      "action": "check"
+    },
+    {
+      "phase": 3,
+      "action": "finish"
+    },
+    {
+      "phase": 4,
+      "action": "create-pr"
+    }
+  ],
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [
+    "manga_env.py",
+    "web_app.py",
+    "web_static/index.html",
+    "web_static/style.css",
+    "web_static/app.js",
+    "env_store.py",
+    "check_bookwalker_cookie.py",
+    "website_actions/bookwalker_nfbr_wait.py",
+    "docker-compose.yml",
+    "scripts/compose.sh",
+    "scripts/docker-test.sh",
+    "README.md",
+    "README.zh-TW.md",
+    "tests/test_manga_env.py",
+    "tests/test_web_app.py",
+    "tests/test_env_store.py",
+    "tests/test_check_bookwalker_cookie.py"
+  ],
+  "notes": "Implementation + follow-ups logged in progress.md (2026-04-11). sp flow: check-report, code review, Record Session, archive still open.",
+  "meta": {
+    "lastUpdated": "2026-04-11",
+    "progressDoc": ".trellis/tasks/04-11-ui-ux-optimization-sp-flow/progress.md"
+  }
+}

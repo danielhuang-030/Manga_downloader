@@ -409,7 +409,8 @@ def wait_for_nfbr_initializer(
                 raise BookwalkerSessionError(
                     'Bookwalker TW: session invalid or expired (「請登入會員」). '
                     'Log in at bookwalker.com.tw in a normal browser, copy all cookies '
-                    'for that site (not only reLogin), update main.py, and retry.'
+                    'for that site (not only reLogin), update MANGA_COOKIES in .env '
+                    '(or settings["cookies"] in main.py when using list mode), and retry.'
                 )
             if _find_nfbr_in_frames(driver, script, 0, max_iframe_depth):
                 logging.info('Bookwalker NFBR reader is ready.')

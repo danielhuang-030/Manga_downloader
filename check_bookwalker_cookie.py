@@ -17,7 +17,7 @@ Examples:
 
   python check_bookwalker_cookie.py --url 'https://...' --cookie 'a=b; c=d'
 
-Exit codes: 0 = no login gate detected (cookie may be valid); 1 = login gate; 2 = request error.
+Exit codes: 0 = no login gate detected (cookie may be valid); 1 = login gate; 2 = request / cookie format error (e.g. Cookie contains non-Latin-1 characters — fix .env and retry).
 """
 import argparse
 import importlib.util
@@ -26,7 +26,12 @@ import sys
 
 import requests
 
-from manga_env import parse_manga_ids, parse_viewer_url_template, resolve_cookie_header
+from manga_env import (
+    coerce_http_cookie_header_latin1,
+    parse_manga_ids,
+    parse_viewer_url_template,
+    resolve_cookie_header,
+)
 from website_actions.bookwalker_nfbr_wait import bookwalker_tw_login_gate_in_markup
 
 
@@ -140,6 +145,20 @@ def main():
             'No cookie: use --from-main, or .env MANGA_COOKIES / BOOKWALKER_COOKIE, '
             'or pass --cookie / --cookie-file.',
         )
+
+    cookie, dropped = coerce_http_cookie_header_latin1(cookie)
+    if dropped:
+        print(
+            'Error: Cookie contains %d character(s) that cannot be sent in HTTP headers (must be Latin-1). '
+            'Common cause: Unicode ellipsis … (U+2026) from a truncated copy — the middle of a token may be missing.\n'
+            'Fix: In browser DevTools → Application → Cookies → https://www.bookwalker.com.tw , '
+            'copy the full raw cookie string (or re-export), update MANGA_COOKIES in .env, retry.'
+            % dropped,
+            file=sys.stderr,
+        )
+        return 2
+    if not cookie.strip():
+        parser.error('Cookie is empty; set MANGA_COOKIES / BOOKWALKER_COOKIE or use --cookie / --from-main.')
 
     headers = {
         'Cookie': cookie,

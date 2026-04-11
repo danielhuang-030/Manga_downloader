@@ -11,4 +11,4 @@ if ! command -v docker >/dev/null 2>&1; then
   exit 1
 fi
 
-exec docker compose run --rm python python -m pytest tests/ -v "$@"
+exec "$ROOT/scripts/compose.sh" run --rm python python -m pytest tests/ -v "$@"

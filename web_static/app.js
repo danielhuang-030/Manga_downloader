@@ -3,6 +3,51 @@ function setMsg(el, text, isError) {
   el.classList.toggle("error", Boolean(isError));
 }
 
+const THEME_KEY = "manga_web_theme";
+const THEME_VALUES = new Set(["light", "dark", "system"]);
+
+function applyTheme(value) {
+  const v = THEME_VALUES.has(value) ? value : "system";
+  document.documentElement.dataset.theme = v;
+  const sel = document.getElementById("theme-select");
+  if (sel) sel.value = v;
+}
+
+function initTheme() {
+  let stored = localStorage.getItem(THEME_KEY);
+  if (!THEME_VALUES.has(stored)) {
+    stored = "system";
+  }
+  applyTheme(stored);
+
+  const sel = document.getElementById("theme-select");
+  if (!sel) return;
+
+  sel.addEventListener("change", () => {
+    const v = sel.value;
+    localStorage.setItem(THEME_KEY, v);
+    applyTheme(v);
+  });
+}
+
+function detailFromErrorBody(body) {
+  const d = body && body.detail;
+  if (typeof d === "string") return d;
+  if (Array.isArray(d)) {
+    return d
+      .map((item) => {
+        if (item && typeof item === "object" && item.msg != null) return String(item.msg);
+        return JSON.stringify(item);
+      })
+      .join("；");
+  }
+  if (d && typeof d === "object") {
+    if (d.message != null) return String(d.message);
+    return JSON.stringify(d);
+  }
+  return "請求失敗";
+}
+
 async function loadEnv() {
   const res = await fetch("/api/env");
   if (!res.ok) throw new Error("GET /api/env failed: " + res.status);
@@ -32,7 +77,7 @@ document.getElementById("env-form").addEventListener("submit", async (e) => {
     });
     if (!res.ok) {
       const detail = await res.json().catch(() => ({}));
-      throw new Error(detail.detail || res.statusText);
+      throw new Error(detailFromErrorBody(detail) || res.statusText);
     }
     setMsg(msg, "已儲存。", false);
     await loadEnv();
@@ -76,6 +121,65 @@ document.getElementById("btn-start").addEventListener("click", async () => {
     setMsg(msg, String(err.message || err), true);
   }
 });
+
+document.getElementById("btn-append-id").addEventListener("click", async () => {
+  const envMsg = document.getElementById("env-msg");
+  const form = document.getElementById("env-form");
+  const urlEl = document.getElementById("viewer-url-paste");
+  const url = urlEl ? String(urlEl.value || "").trim() : "";
+  const idsField = form.elements.namedItem("MANGA_IDS");
+  const tplField = form.elements.namedItem("MANGA_VIEWER_URL_TEMPLATE");
+  const mangaIds = idsField ? String(idsField.value || "") : "";
+  const templateRaw = tplField ? String(tplField.value || "") : "";
+
+  const payload = {
+    url,
+    MANGA_IDS: mangaIds,
+    MANGA_VIEWER_URL_TEMPLATE: templateRaw.trim() === "" ? "" : templateRaw,
+  };
+
+  try {
+    const res = await fetch("/api/env/manga-id-from-url", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+
+    if (res.status === 400) {
+      setMsg(envMsg, detailFromErrorBody(data), true);
+      return;
+    }
+
+    if (!res.ok) {
+      setMsg(envMsg, detailFromErrorBody(data) || "請求失敗 (" + res.status + ")", true);
+      return;
+    }
+
+    const result = data.result;
+    const messageZh = data.message_zh != null ? String(data.message_zh) : "";
+
+    if (result === "appended") {
+      if (idsField && data.manga_ids != null) {
+        idsField.value = String(data.manga_ids);
+      }
+      setMsg(envMsg, messageZh || "已將解析出的 ID 附加至清單", false);
+      if (urlEl) urlEl.value = "";
+      return;
+    }
+
+    if (result === "duplicate") {
+      setMsg(envMsg, messageZh || "清單已包含此 ID，未變更", false);
+      return;
+    }
+
+    setMsg(envMsg, messageZh || JSON.stringify(data), false);
+  } catch (err) {
+    setMsg(envMsg, String(err.message || err), true);
+  }
+});
+
+initTheme();
 
 loadEnv().catch((err) => {
   setMsg(document.getElementById("env-msg"), String(err.message || err), true);
