@@ -19,13 +19,15 @@ Site-specific logic lives under `website_actions/`; `Downloader` picks the imple
 
 ## Supported sites (registered in code)
 
-| Module | Site |
-|--------|------|
-| `bookwalker_tw_actions` | Bookwalker Taiwan (`bookwalker.com.tw`) |
-| `bookwalker_jp_actions` | Bookwalker Japan (`bookwalker.jp`) |
-| `cmoa_jp_actions` | Cmoa manga (`cmoa.jp`) |
-| `coma_jp_novel` (`CmoaJPNovels`) | Cmoa novels |
-| `takeshobo_co_jp_actions` | Takeshobo Gamma Plus, etc. (`gammaplus.takeshobo.co.jp`) |
+The table lists modules under `website_actions/`. **In this fork, only Bookwalker Taiwan has been verified end-to-end** (including viewer / `.env` defaults and tooling). Other rows inherit upstream implementations and are **not verified** here—selectors or reader flows may be outdated.
+
+| Module | Site | Verification (this fork) |
+|--------|------|----------------------------|
+| `bookwalker_tw_actions` | Bookwalker Taiwan (`bookwalker.com.tw`) | **Verified** |
+| `bookwalker_jp_actions` | Bookwalker Japan (`bookwalker.jp`) | Not verified |
+| `cmoa_jp_actions` | Cmoa manga (`cmoa.jp`) | Not verified |
+| `coma_jp_novel` (`CmoaJPNovels`) | Cmoa novels | Not verified |
+| `takeshobo_co_jp_actions` | Takeshobo Gamma Plus, etc. (`gammaplus.takeshobo.co.jp`) | Not verified |
 
 If the URL does not match any `WebsiteActions.check_url`, the program raises `NotImplementedError`.
 

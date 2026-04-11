@@ -19,13 +19,15 @@
 
 ## 目前實作之網站（程式內註冊）
 
-| 模組 | 說明 |
-|------|------|
-| `bookwalker_tw_actions` | Bookwalker 台灣（`bookwalker.com.tw`） |
-| `bookwalker_jp_actions` | Bookwalker 日本（`bookwalker.jp`） |
-| `cmoa_jp_actions` | Cmoa 漫畫（`cmoa.jp`） |
-| `coma_jp_novel`（`CmoaJPNovels`） | Cmoa 小說相關 |
-| `takeshobo_co_jp_actions` | 竹書房 Gamma Plus 等（`gammaplus.takeshobo.co.jp`） |
+下表列出 `website_actions/` 內已註冊之模組。**本 fork 目前僅針對 Bookwalker 台灣完成端到端驗證**（含 viewer／`.env` 預設與相關工具）；其餘為上游既有實作，標為**未驗證**—實際使用可能因閱讀器改版或選擇器過期而無法運作。
+
+| 模組 | 說明 | 本 fork 驗證狀態 |
+|------|------|------------------|
+| `bookwalker_tw_actions` | Bookwalker 台灣（`bookwalker.com.tw`） | **已驗證** |
+| `bookwalker_jp_actions` | Bookwalker 日本（`bookwalker.jp`） | 未驗證 |
+| `cmoa_jp_actions` | Cmoa 漫畫（`cmoa.jp`） | 未驗證 |
+| `coma_jp_novel`（`CmoaJPNovels`） | Cmoa 小說相關 | 未驗證 |
+| `takeshobo_co_jp_actions` | 竹書房 Gamma Plus 等（`gammaplus.takeshobo.co.jp`） | 未驗證 |
 
 若網址無法對應任一 `WebsiteActions.check_url`，程式會拋出 `NotImplementedError`。
 
