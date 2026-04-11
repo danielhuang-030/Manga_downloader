@@ -1,25 +1,27 @@
-"""Tests for check_bookwalker_cookie helpers (no HTTP)."""
+"""manga_env — HTTP Cookie header Latin-1 coercion (used by check_bookwalker_cookie)."""
 
-import pytest
-
-
-def test_load_settings_from_main(tmp_path):
-    stub = tmp_path / 'main_stub.py'
-    stub.write_text(
-        "settings = {'cookies': 'a=b; c=d', 'manga_url': ['https://example.com/viewer']}\n",
-        encoding='utf-8',
-    )
-    from check_bookwalker_cookie import _load_settings_from_main
-
-    s = _load_settings_from_main(str(stub))
-    assert s['cookies'] == 'a=b; c=d'
-    assert s['manga_url'] == ['https://example.com/viewer']
+from manga_env import coerce_http_cookie_header_latin1
 
 
-def test_load_settings_from_main_missing_settings(tmp_path):
-    bad = tmp_path / 'bad.py'
-    bad.write_text('x = 1\n', encoding='utf-8')
-    from check_bookwalker_cookie import _load_settings_from_main
+def test_coerce_cookie_header_drops_unicode_ellipsis():
+    raw = "a=b;" + "\u2026" + "c=d"
+    out, dropped = coerce_http_cookie_header_latin1(raw)
 
-    with pytest.raises(ValueError, match='settings'):
-        _load_settings_from_main(str(bad))
+    assert dropped == 1
+    assert out == "a=b;c=d"
+
+
+def test_coerce_cookie_header_keeps_ascii():
+    s = "foo=bar; baz=qux"
+    out, dropped = coerce_http_cookie_header_latin1(s)
+
+    assert dropped == 0
+    assert out == s
+
+
+def test_coerce_cookie_header_keeps_latin1_supplement():
+    s = "x=\xff"
+    out, dropped = coerce_http_cookie_header_latin1(s)
+
+    assert dropped == 0
+    assert out == s

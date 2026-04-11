@@ -1,34 +1,52 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" data-theme="system">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Manga_downloader</title>
-  <link rel="stylesheet" href="/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,600&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
+  <header class="site-header">
+    <h1 class="site-title">Manga_downloader</h1>
+    <div class="theme-control">
+      <label for="theme-select">主題</label>
+      <select id="theme-select" aria-label="介面主題">
+        <option value="light">淺色</option>
+        <option value="dark">深色</option>
+        <option value="system">跟隨系統</option>
+      </select>
+    </div>
+  </header>
+
   <main>
-    <h1>Manga_downloader</h1>
     <p class="hint">本機設定（<code>.env</code>）。Cookie 欄位載入後為遮罩；若不變更請勿覆寫為其他字串。</p>
 
     <section class="panel">
       <h2>環境變數</h2>
       <form id="env-form">
-        <label>MANGA_COOKIES <textarea name="MANGA_COOKIES" rows="3" placeholder="***masked***"></textarea></label>
-        <label>BOOKWALKER_COOKIE <textarea name="BOOKWALKER_COOKIE" rows="2" placeholder="選填"></textarea></label>
-        <label>MANGA_RES <input name="MANGA_RES" /></label>
-        <label>MANGA_SLEEP_TIME <input name="MANGA_SLEEP_TIME" type="text" /></label>
-        <label>MANGA_IDS <input name="MANGA_IDS" /></label>
-        <label>MANGA_VIEWER_URL_TEMPLATE <input name="MANGA_VIEWER_URL_TEMPLATE" placeholder="選填，須含 {id}" /></label>
-        <label>MANGA_HEADLESS <input name="MANGA_HEADLESS" placeholder="選填：new / old / 0" /></label>
-        <button type="submit">儲存</button>
+        <label>Cookie（MANGA_COOKIES）<textarea name="MANGA_COOKIES" rows="3" placeholder="***masked***"></textarea></label>
+        <label>備用 Cookie（BOOKWALKER_COOKIE）<textarea name="BOOKWALKER_COOKIE" rows="2" placeholder="選填"></textarea></label>
+        <label>視窗解析度 WxH（MANGA_RES）<input name="MANGA_RES" /></label>
+        <label>翻頁間隔秒數（MANGA_SLEEP_TIME）<input name="MANGA_SLEEP_TIME" type="text" /></label>
+        <label>漫畫 ID 清單（MANGA_IDS）<input name="MANGA_IDS" /></label>
+        <div class="paste-id-row">
+          <input id="viewer-url-paste" type="url" inputmode="url" autocomplete="off" placeholder="貼上完整 viewer 網址" />
+          <button type="button" id="btn-append-id">從網址加入 ID</button>
+        </div>
+        <label>Viewer 網址模板（MANGA_VIEWER_URL_TEMPLATE）<input name="MANGA_VIEWER_URL_TEMPLATE" placeholder="選填，須含 {id}" /></label>
+        <label>Headless 模式（MANGA_HEADLESS）<input name="MANGA_HEADLESS" placeholder="選填：new / old / 0" /></label>
+        <button type="submit" class="btn-primary">儲存</button>
       </form>
       <p id="env-msg" class="msg" aria-live="polite"></p>
     </section>
 
     <section class="panel">
       <h2>下載</h2>
-      <button type="button" id="btn-start">開始下載</button>
+      <button type="button" id="btn-start" class="btn-primary">開始下載</button>
       <p id="start-msg" class="msg" aria-live="polite"></p>
     </section>
 
@@ -37,6 +55,6 @@
       <pre id="log" class="log"></pre>
     </section>
   </main>
-  <script src="/app.js" defer></script>
+  <script src="/static/app.js" defer></script>
 </body>
 </html>
