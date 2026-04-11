@@ -49,17 +49,23 @@ pip install -r requirements-dev.txt
 
 ### 以容器執行測試（建議與 CI 一致）
 
-需已安裝 **Docker** 與 **Docker Compose**。於專案根目錄：
+需已安裝 **Docker** 與 **Docker Compose**。於專案根目錄，**建議一律透過 `./scripts/compose.sh`** 呼叫 Compose（會帶入主機 `MANGA_WEB_UID`／`MANGA_WEB_GID`，並在存在 **`compose.env`** 時加上 `--env-file compose.env`）：
 
 ```bash
 # 先建置映像（首次或 Dockerfile／依賴變更後）
-docker compose build python
+./scripts/compose.sh build python
 
-# 跑全部測試（等同在映像內執行 python -m pytest tests/ -v）
+# 跑全部測試（腳本內部已改為經 compose.sh 呼叫 Compose）
 ./scripts/docker-test.sh
 ```
 
-若 `.env` 內含會被 Compose 誤解的 `$`，請改用：
+自行跑 pytest 時，優先使用：
+
+```bash
+./scripts/compose.sh run --rm python python -m pytest tests/ -v
+```
+
+若必須直接打 `docker compose`，且專案 `.env` 內含會被 YAML 誤解的 `$`，請加上：
 
 ```bash
 docker compose --env-file compose.env run --rm python python -m pytest tests/ -v
@@ -84,8 +90,8 @@ python run_web_ui.py
 瀏覽器開啟 `http://127.0.0.1:8765/` 可編輯 `.env`、啟動下載，並以 **SSE** 檢視進度。請勿將服務暴露於公開網路。
 
 - **主題**：頁首可切換淺色／深色／跟隨系統（偏好存於瀏覽器 `localStorage` 鍵 `manga_web_theme`）。
-- **從網址加入漫畫 ID**：在「漫畫 ID 清單」下方貼上完整 viewer 網址並按「從網址加入 ID」，後端會依目前的 **`MANGA_VIEWER_URL_TEMPLATE`**（與表單內容；空則用預設模板）解析數字 ID 並合併至清單；**仍須按「儲存」**才會寫入 `.env`。無法解析時顯示錯誤；清單已含該 ID 時顯示提示且不重複寫入。
-- **表單標籤**：欄位以正體中文說明，並附實際環境變數鍵名（括號內）以利對照文件。
+- **從網址加入漫畫 ID**：在「漫畫 ID 清單」下方「從網址輔助填入」區塊貼上完整 viewer 網址，按「從網址加入 ID」，後端會依目前的 **`MANGA_VIEWER_URL_TEMPLATE`**（與表單內容；空則用預設模板）解析數字 ID 並合併至清單；**仍須按「儲存」**才會寫入 `.env`。無法解析時顯示錯誤；清單已含該 ID 時顯示提示且不重複寫入。
+- **介面語言／表單標籤**：頁首 **介面語言** 可切換**正體中文**或 **English**；欄位標籤與訊息隨語系變更，並保留環境變數鍵名（括號內）以利對照文件。
 
 ### 以 Docker Compose 對外連接埠（可調）
 
@@ -97,16 +103,16 @@ python run_web_ui.py
 | `MANGA_WEB_PORT=9000` | 主機 `9000` → 容器 `8765` |
 
 ```bash
-docker compose build web
-docker compose up web
+./scripts/compose.sh build web
+./scripts/compose.sh up web
 ```
 
 範例：`.env` 內 `MANGA_WEB_PORT=9000` 時，主機請開 `http://127.0.0.1:9000/`。
 
 **掛載目錄的檔案擁有者（Docker）：** 容器內若以 root 寫入 bind mount，`.env`、`downloads/` 等易變成 `root:root`。`merge_write_dotenv` 會在寫入後盡力 **`chown` 回寫入前的 uid/gid**（新建檔則對齊**父目錄**擁有者）。**`web` 與 `python` 服務**已共用 `docker-compose.yml` 的 `user: "${MANGA_WEB_UID:-0}:${MANGA_WEB_GID:-0}"`，並設 **`HOME=/app`**（避免數字 UID 在映像內無家目錄時，Chrome／undetected_chromedriver 嘗試寫入 **`/.local`** 而 `Permission denied`）。
 
-- **自動帶入主機 UID/GID（建議）：** 使用專案腳本 **`./scripts/compose.sh`** 取代直接打 `docker compose`。該腳本會在執行前設定 `MANGA_WEB_UID`、`MANGA_WEB_GID`（若環境裡已設定則不覆寫），並在有 **`compose.env`** 時加上 `--env-file compose.env`。範例：`./scripts/compose.sh up web`、`./scripts/compose.sh run --rm python python main_env.py`。跑測試的 **`./scripts/docker-test.sh`** 亦已改為透過此腳本呼叫 Compose。
-- **手動：** `export MANGA_WEB_UID=$(id -u) MANGA_WEB_GID=$(id -g)` 後再執行 `docker compose --env-file compose.env …` 亦可。
+- **建議（預設做法）：** 任何 **`docker compose`** 指令都請改經 **`./scripts/compose.sh …`** 執行（`build`／`up`／`run` 等參數原樣往後傳）。腳本會設定 `MANGA_WEB_UID`、`MANGA_WEB_GID`（若環境已設定則不覆寫），並在存在 **`compose.env`** 時加上 `--env-file compose.env`。範例：`./scripts/compose.sh up web`、`./scripts/compose.sh run --rm python python main_env.py`。跑測試的 **`./scripts/docker-test.sh`** 亦透過此腳本呼叫 Compose。
+- **手動（僅在不使用腳本時）：** `export MANGA_WEB_UID=$(id -u) MANGA_WEB_GID=$(id -g)` 後再執行 `docker compose --env-file compose.env …`。
 
 ---
 
@@ -168,7 +174,7 @@ python main.py
 | `MANGA_VIEWER_URL_TEMPLATE` | 否 | 含 `{id}` 的網址模板 |
 | `MANGA_HEADLESS` | 否 | `new`（預設）／`old`／`0` 等關閉 headless；見 `downloader.py` |
 
-**Docker Compose 注意**：專案根若同時有 `docker-compose.yml` 與 `.env`，Compose 會用 `.env` 做 **YAML 變數替換**，cookie 內的 `$` 可能造成警告。建議執行容器時使用 **`--env-file compose.env`**（見 `compose.env` 與 `docker-compose.yml` 註解）；應用程式仍透過掛載的專案目錄由 **python-dotenv** 讀取實際 `.env`。
+**Docker Compose 注意**：專案根若同時有 `docker-compose.yml` 與 `.env`，Compose 會用 `.env` 做 **YAML 變數替換**，cookie 內的 `$` 可能造成警告。建議優先使用 **`./scripts/compose.sh …`**（有 `compose.env` 時會自動帶入 `--env-file`），或手動 **`docker compose --env-file compose.env …`**（見 `compose.env` 與 `docker-compose.yml` 註解）；應用程式仍透過掛載的專案目錄由 **python-dotenv** 讀取實際 `.env`。
 
 ---
 
@@ -179,12 +185,12 @@ python main.py
 - 範例（跑測試）：
 
   ```bash
-  docker compose --env-file compose.env run --rm python python -m pytest tests/ -v
+  ./scripts/compose.sh run --rm python python -m pytest tests/ -v
   ```
 
-映像預設 **`CMD` 為 `sleep infinity`**；**`docker-compose.yml` 的 `python` 服務另設 `command: sleep infinity`**，會覆寫映像 CMD，避免本機仍使用舊映像時仍執行 `python main.py`。更新 compose 後請 **`docker compose up -d --force-recreate`**（或先 `down` 再 `up`）讓容器套用新設定。
+映像預設 **`CMD` 為 `sleep infinity`**；**`docker-compose.yml` 的 `python` 服務另設 `command: sleep infinity`**，會覆寫映像 CMD，避免本機仍使用舊映像時仍執行 `python main.py`。更新 compose 後請 **`./scripts/compose.sh up -d --force-recreate`**（或先 `down` 再 `up`）讓容器套用新設定。
 
-手動下載請自行執行，例如：`docker compose run --rm python python main_env.py` 或 `docker compose run --rm python python main.py`。
+手動下載請自行執行，例如：`./scripts/compose.sh run --rm python python main_env.py` 或 `./scripts/compose.sh run --rm python python main.py`；本機亦可直接 `python main_env.py`／`python main.py`。
 
 ---
 

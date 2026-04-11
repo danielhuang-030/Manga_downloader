@@ -49,20 +49,28 @@ pip install -r requirements-dev.txt
 
 ### Run tests in a container (matches Dockerfile / CI)
 
-Requires **Docker** and **Docker Compose**. From the project root:
+Requires **Docker** and **Docker Compose**. From the project root, **prefer `./scripts/compose.sh`** (sets host `MANGA_WEB_UID` / `MANGA_WEB_GID` and adds `--env-file compose.env` when that file exists):
 
 ```bash
-docker compose build python
+./scripts/compose.sh build python
 ./scripts/docker-test.sh
 ```
 
-If Compose warns about `$` in your project `.env`, use a dedicated env file for Compose:
+`./scripts/docker-test.sh` already invokes Compose via **`./scripts/compose.sh`**.
+
+If you must call Compose directly (e.g. CI without the wrapper) and the project `.env` triggers `$` YAML warnings, use:
 
 ```bash
 docker compose --env-file compose.env run --rm python python -m pytest tests/ -v
 ```
 
-Pass extra pytest args after the script, e.g. `./scripts/docker-test.sh tests/test_env_store.py -q`.
+Equivalent with the wrapper:
+
+```bash
+./scripts/compose.sh run --rm python python -m pytest tests/ -v
+```
+
+Pass extra pytest args after the test script, e.g. `./scripts/docker-test.sh tests/test_env_store.py -q`.
 
 ---
 
@@ -77,8 +85,8 @@ python run_web_ui.py
 Open `http://127.0.0.1:8765/` to edit `.env`, start downloads, and stream progress over **SSE**. Do not expose this service to untrusted networks.
 
 - **Theme:** Use the header control to switch **light**, **dark**, or **follow system** (stored in browser `localStorage` as `manga_web_theme`).
-- **Add ID from URL:** Paste a full viewer URL under **MANGA_IDS** and click **從網址加入 ID**; the server parses the numeric ID using **`MANGA_VIEWER_URL_TEMPLATE`** (from the form, or the default when empty) and merges it into the list. **Save** still writes `.env`. Parse failures return an error message; duplicate IDs show a notice and do not change the list.
-- **Labels:** Form fields show Traditional Chinese descriptions plus the env var key in parentheses.
+- **Add ID from URL:** Paste a full viewer URL in the helper row under **MANGA_IDS**, then click **Append ID from URL**; the server parses the numeric ID using **`MANGA_VIEWER_URL_TEMPLATE`** (from the form, or the default when empty) and merges it into the list. **Save** still writes `.env`. Parse failures return an error message; duplicate IDs show a notice and do not change the list.
+- **Language / labels:** Use the header **Language** control for **English** or **Traditional Chinese**; form labels and messages follow the selection (env var keys stay in parentheses).
 
 ### Docker Compose: published (host) port
 
@@ -90,16 +98,16 @@ Inside the container the server listens on **`0.0.0.0:8765`** (fixed in `docker-
 | `MANGA_WEB_PORT=9000` | host `9000` → container `8765` |
 
 ```bash
-docker compose build web
-docker compose up web
+./scripts/compose.sh build web
+./scripts/compose.sh up web
 ```
 
 Example: with `MANGA_WEB_PORT=9000` in `.env`, open `http://127.0.0.1:9000/` on the host.
 
 **Bind-mounted file ownership (Docker):** processes running as **root** often create `root:root` files on the host (including `.env` and `downloads/`). `merge_write_dotenv` tries to **`chown`** `.env` back after replace. Both **`web`** and **`python`** services use `user: "${MANGA_WEB_UID:-0}:${MANGA_WEB_GID:-0}"` in `docker-compose.yml`, and set **`HOME=/app`** so Chrome / undetected_chromedriver does not try to write **`/.local`** when the numeric user has no real home directory in the image.
 
-- **Auto-set host UID/GID (recommended):** run **`./scripts/compose.sh`** instead of `docker compose` directly. It exports `MANGA_WEB_UID` / `MANGA_WEB_GID` from `id -u` / `id -g` unless already set, and adds `--env-file compose.env` when that file exists. Examples: `./scripts/compose.sh up web`, `./scripts/compose.sh run --rm python python main_env.py`. **`./scripts/docker-test.sh`** uses this wrapper too.
-- **Manual:** `export MANGA_WEB_UID=$(id -u) MANGA_WEB_GID=$(id -g)` then `docker compose --env-file compose.env …`.
+- **Recommended:** run **`./scripts/compose.sh …`** for any Compose command (build / up / run). It exports `MANGA_WEB_UID` / `MANGA_WEB_GID` from `id -u` / `id -g` unless already set, and adds `--env-file compose.env` when that file exists. Examples: `./scripts/compose.sh up web`, `./scripts/compose.sh run --rm python python main_env.py`. **`./scripts/docker-test.sh`** uses this wrapper.
+- **Manual (only if you skip the script):** `export MANGA_WEB_UID=$(id -u) MANGA_WEB_GID=$(id -g)` then `docker compose --env-file compose.env …`.
 
 ---
 
@@ -161,7 +169,7 @@ python main.py
 | `MANGA_VIEWER_URL_TEMPLATE` | no | URL template with `{id}` |
 | `MANGA_HEADLESS` | no | `new` (default) / `old` / `0` to disable headless; see `downloader.py` |
 
-**Docker Compose note**: If both `docker-compose.yml` and `.env` exist at the project root, Compose uses `.env` for **YAML variable substitution**, and `$` inside cookies can trigger warnings. Prefer **`docker compose --env-file compose.env ...`** (see `compose.env` and comments in `docker-compose.yml`). The app still loads the real `.env` via **python-dotenv** from the mounted project directory.
+**Docker Compose note**: If both `docker-compose.yml` and `.env` exist at the project root, Compose uses `.env` for **YAML variable substitution**, and `$` inside cookies can trigger warnings. Prefer **`./scripts/compose.sh …`** (adds `--env-file compose.env` when present) or **`docker compose --env-file compose.env ...`** (see `compose.env` and comments in `docker-compose.yml`). The app still loads the real `.env` via **python-dotenv** from the mounted project directory.
 
 ---
 
@@ -172,12 +180,12 @@ python main.py
 - Example (run tests):
 
   ```bash
-  docker compose --env-file compose.env run --rm python python -m pytest tests/ -v
+  ./scripts/compose.sh run --rm python python -m pytest tests/ -v
   ```
 
-The image default `CMD` is `sleep infinity`, and the **`python` service in `docker-compose.yml` sets `command: sleep infinity`** to override the image CMD (so old cached images that still had `python main.py` do not auto-run). After pulling compose changes, recreate containers: `docker compose up -d --force-recreate` (or `docker compose down` then `up`).
+The image default `CMD` is `sleep infinity`, and the **`python` service in `docker-compose.yml` sets `command: sleep infinity`** to override the image CMD (so old cached images that still had `python main.py` do not auto-run). After pulling compose changes, recreate containers: `./scripts/compose.sh up -d --force-recreate` (or `down` then `up`).
 
-Run downloads explicitly, e.g. `docker compose run --rm python python main_env.py` or `python main.py`.
+Run downloads explicitly, e.g. `./scripts/compose.sh run --rm python python main_env.py` or `python main.py` on the host.
 
 ---
 
