@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 7
-- **Last Active**: 2026-04-11
+- **Total Sessions**: 8
+- **Last Active**: 2026-04-12
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~241 | Active |
+| `journal-1.md` | ~273 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits |
 |---|------|-------|---------|
+| 8 | 2026-04-12 | Web UI: cooperative download stop | `8070a9f` |
 | 7 | 2026-04-11 | Web UI/UX 優化與 sp flow 收尾 | `d4ef654` |
 | 6 | 2026-04-07 | Web UI：FastAPI、.env、SSE 進度與 Docker | `dbc4dff`, `1f82c7e` |
 | 5 | 2026-04-06 | NFBR 解析、README 同步與任務封存 | `54b3881`, `7d72f64`, `46bf7bb` |
