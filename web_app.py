@@ -106,7 +106,10 @@ def api_download_start():
             q.put(merged)
 
         try:
-            run_download_from_dotenv(progress_reporter=reporter)
+            run_download_from_dotenv(
+                str(ENV_PATH),
+                progress_reporter=reporter,
+            )
         except Exception as e:
             q.put({"job_id": job_id, "type": "run_error", "message": str(e)[:500]})
         finally:

@@ -27,9 +27,19 @@ class MangaConfig(NamedTuple):
 def load_manga_config(dotenv_path: str | None = None) -> MangaConfig:
     """
     Load dotenv then read MANGA_* keys from os.environ.
-    Process env wins over .env file values for keys already set (dotenv default).
+
+    若傳入 ``dotenv_path``，則以該檔為準並 **覆寫** 已存在之環境變數
+    （``override=True``）。長連線的 Web 程序在寫入新 ``.env`` 後可再度載入，
+    否則第一次 ``load_dotenv`` 寫入的 ``MANGA_IDS`` 等會永遠留在 ``os.environ``，
+    導致之後讀到的仍是舊清單。
+
+    若 ``dotenv_path`` 為 ``None``，則呼叫無路徑的 ``load_dotenv()`` 且 **不**覆寫，
+    讓行程環境（例如 Docker / CLI 的 ``export``）優先於檔案。
     """
-    load_dotenv(dotenv_path)
+    if dotenv_path is not None:
+        load_dotenv(dotenv_path, override=True)
+    else:
+        load_dotenv()
 
     env = os.environ
     cookies = resolve_cookie_header(env)
