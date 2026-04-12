@@ -19,6 +19,51 @@ let downloadTotalBooks = 1;
 let downloadBookIndex = 0;
 let lastProgressPercent = 0;
 
+/** @type {"idle"|"running"|"stopping"} */
+let downloadUiPhase = "idle";
+let downloadJobId = null;
+/** @type {EventSource | null} */
+let downloadEs = null;
+
+function syncDownloadPrimaryButton() {
+  const btn = document.getElementById("btn-start");
+  if (!btn) return;
+  if (downloadUiPhase === "idle") {
+    btn.disabled = false;
+    btn.textContent = t("download.start");
+    btn.setAttribute("aria-busy", "false");
+    btn.setAttribute("aria-label", t("download.start"));
+  } else if (downloadUiPhase === "running") {
+    btn.disabled = false;
+    btn.textContent = t("download.stop");
+    btn.setAttribute("aria-busy", "true");
+    btn.setAttribute("aria-label", t("download.stop"));
+  } else {
+    btn.disabled = true;
+    btn.textContent = t("download.stopping");
+    btn.setAttribute("aria-busy", "true");
+    btn.setAttribute("aria-label", t("download.stopping"));
+  }
+}
+
+function closeDownloadEventSource() {
+  if (downloadEs) {
+    try {
+      downloadEs.close();
+    } catch {
+      /* ignore */
+    }
+    downloadEs = null;
+  }
+}
+
+function finishDownloadSessionFromStream() {
+  closeDownloadEventSource();
+  downloadJobId = null;
+  downloadUiPhase = "idle";
+  syncDownloadPrimaryButton();
+}
+
 function resetDownloadProgress() {
   downloadTotalBooks = 1;
   downloadBookIndex = 0;
@@ -99,11 +144,18 @@ function applyDownloadProgressEvent(data) {
     } else {
       setDownloadProgress(0, t("progress.ended"), { error: false });
     }
+    finishDownloadSessionFromStream();
+    return;
+  }
+  if (typ === "run_cancelled") {
+    setDownloadProgress(undefined, t("progress.cancelled"), { error: false });
+    finishDownloadSessionFromStream();
     return;
   }
   if (typ === "run_error") {
     const m = data.message ? String(data.message).slice(0, 140) : t("error.generic");
     setDownloadProgress(undefined, t("progress.error_prefix") + m, { error: true });
+    finishDownloadSessionFromStream();
     return;
   }
 }
@@ -153,6 +205,7 @@ function initI18n() {
       window.MangaI18n.setLang(sel.value);
       window.MangaI18n.applyDom();
       resetDownloadProgress();
+      syncDownloadPrimaryButton();
     });
   }
   window.MangaI18n.applyDom();
@@ -217,6 +270,35 @@ document.getElementById("env-form").addEventListener("submit", async (e) => {
 document.getElementById("btn-start").addEventListener("click", async () => {
   const msg = document.getElementById("start-msg");
   const log = document.getElementById("log");
+
+  if (downloadUiPhase === "stopping") {
+    return;
+  }
+
+  if (downloadUiPhase === "running") {
+    if (!downloadJobId) return;
+    downloadUiPhase = "stopping";
+    syncDownloadPrimaryButton();
+    try {
+      const res = await fetch("/api/download/stop", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ job_id: downloadJobId }),
+      });
+      if (!res.ok) {
+        const detail = await res.json().catch(() => ({}));
+        throw new Error(
+          detailFromErrorBody(detail) || t("error.stop_failed", { status: res.status }),
+        );
+      }
+    } catch (err) {
+      setMsg(msg, String(err.message || err), true);
+      downloadUiPhase = "running";
+      syncDownloadPrimaryButton();
+    }
+    return;
+  }
+
   log.textContent = "";
   resetDownloadProgress();
   try {
@@ -232,9 +314,13 @@ document.getElementById("btn-start").addEventListener("click", async () => {
     }
     if (!res.ok) throw new Error(t("error.start_failed", { status: res.status }));
     const { job_id: jobId } = await res.json();
+    downloadJobId = jobId;
+    downloadUiPhase = "running";
+    syncDownloadPrimaryButton();
     setMsg(msg, t("msg.job_started", { id: jobId }), "success");
 
     const es = new EventSource("/api/download/stream/" + encodeURIComponent(jobId));
+    downloadEs = es;
     es.onmessage = (ev) => {
       let line;
       try {
@@ -247,9 +333,15 @@ document.getElementById("btn-start").addEventListener("click", async () => {
       log.scrollTop = log.scrollHeight;
     };
     es.onerror = () => {
-      es.close();
+      closeDownloadEventSource();
+      downloadJobId = null;
+      downloadUiPhase = "idle";
+      syncDownloadPrimaryButton();
     };
   } catch (err) {
+    downloadJobId = null;
+    downloadUiPhase = "idle";
+    syncDownloadPrimaryButton();
     setMsg(msg, String(err.message || err), true);
   }
 });
@@ -318,6 +410,7 @@ document.getElementById("btn-append-id").addEventListener("click", async () => {
 initI18n();
 initTheme();
 resetDownloadProgress();
+syncDownloadPrimaryButton();
 
 loadEnv().catch((err) => {
   setMsg(document.getElementById("env-msg"), String(err.message || err), true);

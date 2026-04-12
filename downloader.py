@@ -27,6 +27,10 @@ logging.basicConfig(format='[%(levelname)s](%(name)s) %(asctime)s : %(message)s'
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
 
 
+class DownloadCancelled(Exception):
+    """Cooperative cancel requested (e.g. Web UI stop)."""
+
+
 def detect_chrome_major_version():
     """
     Chrome major version for undetected_chromedriver's version_main.
@@ -118,6 +122,7 @@ class Downloader:
             cut_image=None, file_name_prefix='', number_of_digits=3, start_page=None,
             end_page=None, viewer_ids=None, viewer_url_template=None,
             progress_reporter=None,
+            cancel_event=None,
     ):
         self._viewer_ids = None
         self._viewer_url_template = DEFAULT_VIEWER_URL_TEMPLATE
@@ -148,8 +153,13 @@ class Downloader:
         self.end_page = end_page
         self.image_box = None
         self._progress_reporter = progress_reporter
+        self._cancel_event = cancel_event
 
         self.init_function()
+
+    def _check_cancel(self):
+        if self._cancel_event and self._cancel_event.is_set():
+            raise DownloadCancelled()
 
     def check_implementation(self, this_manga_url):
         is_implemented_website = False
@@ -273,6 +283,7 @@ class Downloader:
             time.sleep(self.sleep_time)
 
             for i in range(self.start_page, end_page):
+                self._check_cancel()
                 self.actions_class.wait_loading(driver)
                 image_data = self.actions_class.get_imgdata(driver, i + 1)
                 with open(this_image_dir + self.file_name_model % i, 'wb') as img_file:
@@ -313,6 +324,8 @@ class Downloader:
                     lambda x: self.actions_class.get_now_page(x) == i + 1)
 
                 time.sleep(self.sleep_time + random.random() * 2)
+        except DownloadCancelled:
+            raise
         except Exception as err:
             emit_progress(
                 self._progress_reporter,
@@ -377,51 +390,66 @@ class Downloader:
             self._progress_reporter,
             {"type": "run_started", "total_books": max(1, total_books)},
         )
-        if self._viewer_ids:
-            for i, vid in enumerate(self._viewer_ids):
-                self._download_one_viewer_id(i, vid)
-                logging.info("Finished download manga %d, viewer id: %s", i + 1, vid)
+        try:
+            self._check_cancel()
+            if self._viewer_ids:
+                for i, vid in enumerate(self._viewer_ids):
+                    self._check_cancel()
+                    self._download_one_viewer_id(i, vid)
+                    logging.info("Finished download manga %d, viewer id: %s", i + 1, vid)
+                    time.sleep(2)
+                emit_progress(self._progress_reporter, {"type": "run_finished", "ok": True})
+                self.driver.close()
+                self.driver.quit()
+                return
+
+            total_manga = len(self.manga_url)
+            total_dir = len(self.imgdir)
+            if total_manga != total_dir:
+                logging.error('Total manga urls given not equal to imgdir.')
+                emit_progress(
+                    self._progress_reporter,
+                    {
+                        "type": "run_error",
+                        "message": "Total manga urls given not equal to imgdir.",
+                    },
+                )
+                return
+
+            for i in range(total_manga):
+                self._check_cancel()
+                t_manga_url = self.manga_url[i]
+                t_img_dir = self.imgdir[i]
+                self.check_implementation(t_manga_url)
+                if i == 0:
+                    self.login()
+                logging.info("Starting download manga %d, imgdir: %s",
+                             i + 1, t_img_dir)
+                emit_progress(
+                    self._progress_reporter,
+                    {
+                        "type": "book_started",
+                        "viewer_id": "",
+                        "index": i,
+                        "title": t_img_dir,
+                    },
+                )
+                self.prepare_download(t_img_dir, t_manga_url)
+                self.download_book(t_img_dir, progress_book_id=t_img_dir)
+                logging.info("Finished download manga %d, imgdir: %s",
+                             i + 1, t_img_dir)
                 time.sleep(2)
             emit_progress(self._progress_reporter, {"type": "run_finished", "ok": True})
             self.driver.close()
             self.driver.quit()
-            return
-
-        total_manga = len(self.manga_url)
-        total_dir = len(self.imgdir)
-        if total_manga != total_dir:
-            logging.error('Total manga urls given not equal to imgdir.')
+        except DownloadCancelled:
             emit_progress(
                 self._progress_reporter,
-                {
-                    "type": "run_error",
-                    "message": "Total manga urls given not equal to imgdir.",
-                },
+                {"type": "run_cancelled", "ok": False},
             )
-            return
-
-        for i in range(total_manga):
-            t_manga_url = self.manga_url[i]
-            t_img_dir = self.imgdir[i]
-            self.check_implementation(t_manga_url)
-            if i == 0:
-                self.login()
-            logging.info("Starting download manga %d, imgdir: %s",
-                         i + 1, t_img_dir)
-            emit_progress(
-                self._progress_reporter,
-                {
-                    "type": "book_started",
-                    "viewer_id": "",
-                    "index": i,
-                    "title": t_img_dir,
-                },
-            )
-            self.prepare_download(t_img_dir, t_manga_url)
-            self.download_book(t_img_dir, progress_book_id=t_img_dir)
-            logging.info("Finished download manga %d, imgdir: %s",
-                         i + 1, t_img_dir)
-            time.sleep(2)
-        emit_progress(self._progress_reporter, {"type": "run_finished", "ok": True})
-        self.driver.close()
-        self.driver.quit()
+            driver = getattr(self, "driver", None)
+            if driver is not None:
+                try:
+                    driver.quit()
+                except Exception:
+                    pass

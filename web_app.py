@@ -31,12 +31,17 @@ app = FastAPI(title="Manga_downloader Web UI")
 _download_lock = threading.Lock()
 _active_job_id: str | None = None
 _job_queues: dict[str, queue.Queue] = {}
+_job_cancel_events: dict[str, threading.Event] = {}
 
 
 class MangaIdFromUrlBody(BaseModel):
     url: str
     MANGA_IDS: str = Field(..., description="Comma-separated IDs; may be empty string")
     MANGA_VIEWER_URL_TEMPLATE: str | None = None
+
+
+class DownloadStopBody(BaseModel):
+    job_id: str
 
 
 def _mask_secrets(data: dict[str, str]) -> dict[str, str]:
@@ -93,7 +98,9 @@ def api_download_start():
             )
         job_id = str(uuid.uuid4())
         q: queue.Queue = queue.Queue()
+        cancel_ev = threading.Event()
         _job_queues[job_id] = q
+        _job_cancel_events[job_id] = cancel_ev
         _active_job_id = job_id
 
     from download_runner import run_download_from_dotenv
@@ -109,6 +116,7 @@ def api_download_start():
             run_download_from_dotenv(
                 str(ENV_PATH),
                 progress_reporter=reporter,
+                cancel_event=cancel_ev,
             )
         except Exception as e:
             q.put({"job_id": job_id, "type": "run_error", "message": str(e)[:500]})
@@ -116,10 +124,24 @@ def api_download_start():
             with _download_lock:
                 if _active_job_id == job_id:
                     _active_job_id = None
+                _job_cancel_events.pop(job_id, None)
 
     threading.Thread(target=target, daemon=True).start()
 
     return {"job_id": job_id}
+
+
+@app.post("/api/download/stop")
+def api_download_stop(body: DownloadStopBody):
+    with _download_lock:
+        if _active_job_id != body.job_id:
+            raise HTTPException(status_code=404, detail="Unknown or inactive job_id")
+        cancel_ev = _job_cancel_events.get(body.job_id)
+        if cancel_ev is None:
+            raise HTTPException(status_code=404, detail="Unknown or inactive job_id")
+        cancel_ev.set()
+
+    return {"ok": True}
 
 
 @app.get("/api/download/stream/{job_id}")
@@ -134,7 +156,7 @@ def api_download_stream(job_id: str):
                 item = q.get()
                 line = "data: %s\n\n" % (json.dumps(item, ensure_ascii=False),)
                 yield line
-                if item.get("type") in ("run_finished", "run_error"):
+                if item.get("type") in ("run_finished", "run_error", "run_cancelled"):
                     break
         finally:
             _job_queues.pop(job_id, None)

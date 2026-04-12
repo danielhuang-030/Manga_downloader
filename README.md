@@ -86,6 +86,7 @@ python run_web_ui.py
 
 Open `http://127.0.0.1:8765/` to edit `.env`, start downloads, and stream progress over **SSE**. Do not expose this service to untrusted networks.
 
+- **Stop (running job):** After **Start download** succeeds, the same primary button becomes **Stop**. Click it to request cooperative cancellation; the label shows **Stopping…** until the worker thread exits and the WebDriver is released. **Start download** stays unavailable until then (another start returns HTTP **409** while a job is still active or finishing). The SSE stream ends with `type: "run_cancelled"` when you stop the job. Pause/resume is not implemented.
 - **Theme:** Use the header control to switch **light**, **dark**, or **follow system** (stored in browser `localStorage` as `manga_web_theme`).
 - **Add ID from URL:** Paste a full viewer URL in the helper row under **MANGA_IDS**, then click **Append ID from URL**; the server parses the numeric ID using **`MANGA_VIEWER_URL_TEMPLATE`** (from the form, or the default when empty) and merges it into the list. **Save** still writes `.env`. Parse failures return an error message; duplicate IDs show a notice and do not change the list.
 - **Language / labels:** Use the header **Language** control for **English** or **Traditional Chinese**; form labels and messages follow the selection (env var keys stay in parentheses).
