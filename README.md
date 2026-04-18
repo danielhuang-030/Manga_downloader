@@ -4,7 +4,7 @@
 
 **Forked from:** [github.com/xuzhengyi1995/Manga_downloader](https://github.com/xuzhengyi1995/Manga_downloader)
 
-This project uses **Python**, **Selenium**, and **undetected_chromedriver** to drive **Google Chrome / Chromium** and capture page images from supported site readers into files. Use it only where permitted by law, the platform’s terms of service, and personal backup norms.
+This project uses **Python**, **Selenium**, and **undetected_chromedriver** to drive **Google Chrome / Chromium** and capture page images from supported site readers into files. It is intended only for personal backup of titles you have legitimately purchased and are authorized to access, and only where permitted by law and the platform’s terms of service.
 
 ---
 
@@ -231,7 +231,7 @@ tests/               # pytest
 
 ## Disclaimer
 
-This tool only automates backup of **content you are authorized to access**. You must comply with each platform’s terms and copyright law. The authors and this repository are not responsible for misuse or infringement.
+This tool only automates personal backup of **content you have legitimately purchased and are authorized to access**. It is not provided for unauthorized copying, distribution, or access bypass. You must comply with each platform’s terms and copyright law. The authors and this repository are not responsible for misuse or infringement.
 
 ---
 

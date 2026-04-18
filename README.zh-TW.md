@@ -4,7 +4,7 @@
 
 **Fork 自：** [github.com/xuzhengyi1995/Manga_downloader](https://github.com/xuzhengyi1995/Manga_downloader)
 
-以 **Python**、**Selenium** 與 **undetected_chromedriver** 驅動 **Google Chrome／Chromium**，從已實作之網站閱讀器擷取頁面圖像並存成檔案。請僅在合法、符合服務條款與個人備份範圍內使用。
+以 **Python**、**Selenium** 與 **undetected_chromedriver** 驅動 **Google Chrome／Chromium**，從已實作之網站閱讀器擷取頁面圖像並存成檔案。僅限用於**已正版購買且已取得合法存取權限**之內容的個人備份，並須符合當地法律與平台服務條款。
 
 ---
 
@@ -236,7 +236,7 @@ tests/               # pytest
 
 ## 免責說明
 
-本工具僅協助自動化**已授權存取之內容**的備份流程；使用者須自行遵守各平台服務條款與著作權法。開發者與本儲存庫不對濫用或侵權行為負責。
+本工具僅協助自動化**已正版購買且已取得合法存取權限之內容**的個人備份流程；不得用於未授權重製、散布或繞過存取限制。使用者須自行遵守各平台服務條款與著作權法。開發者與本儲存庫不對濫用或侵權行為負責。
 
 ---
 
